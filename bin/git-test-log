@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+# If no commits specified, we default to HEAD@{u}..HEAD. However if HEAD is uptodate,
+# then `rev-parse` returns nothing. In that case we fallback to HEAD^..HEAD.
+# XXX: This breaks if `some-other-brach@{u}..some-other-brach` is specified.
+# adding a `--boundary` should have solved this issue, but there seems to be
+# a bug in `git rev-parse` and `git rev-list`.
+parsed_revs=($(git rev-parse --revs-only "$@" --default HEAD@{u}..HEAD))
+[ ${#parsed_revs[@]} = 0 ] && parsed_revs=(HEAD ^HEAD^)
+
+commit="%C(auto)%h"
+format_good="$commit %Cgreen✓%Creset%C(auto) %d %s"
+format_bad="$commit %C(reverse red)✗%Creset%C(auto) %d %s"
+format_unknown="$commit%Creset %C(auto)? %d %s"
+
+while read -r rev; do
+    test_status=$(git notes --ref=refs/notes/tests/default  show "$rev^{tree}" 2>/dev/null)
+    [ $? = 0 ] || test_status=unknown
+
+    format=
+    case "$test_status" in
+        good)    format="$format_good" ;;
+        bad)     format="$format_bad" ;;
+        unknown) format="$format_unknown" ;;
+    esac
+
+    git log --format="$format" -1 $rev 
+done < <(git rev-list "${parsed_revs[@]}" )
