@@ -9,9 +9,9 @@ parsed_revs=($(git rev-parse --revs-only "$@" --default HEAD@{u}..HEAD))
 [ ${#parsed_revs[@]} = 0 ] && parsed_revs=(HEAD ^HEAD^)
 
 commit="%C(auto)%h"
-format_good="$commit %Cgreen✓%Creset%C(auto) %d %s"
-format_bad="$commit %C(reverse red)✗%Creset%C(auto) %d %s"
-format_unknown="$commit%Creset %C(auto)? %d %s"
+format_good="$commit %Cgreen✓%Creset%C(auto)%d %s"
+format_bad="$commit %C(reverse red)✗%Creset%C(auto)%d %s"
+format_unknown="$commit%Creset %C(auto)?%d %s"
 
 while read -r rev; do
     test_status=$(git notes --ref=refs/notes/tests/default  show "$rev^{tree}" 2>/dev/null)
