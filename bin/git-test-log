@@ -3,13 +3,7 @@
 SUBDIRECTORY_OK=1
 . $(git --exec-path)/git-sh-setup
 
-# If no commits specified, we default to HEAD@{u}..HEAD. However if HEAD is uptodate,
-# then `rev-parse` returns nothing. In that case we fallback to HEAD^..HEAD.
-# XXX: This breaks if `some-other-brach@{u}..some-other-brach` is specified.
-# adding a `--boundary` should have solved this issue, but there seems to be
-# a bug in `git rev-parse` and `git rev-list`.
-parsed_revs=($(git rev-parse --revs-only "$@" --default HEAD@{u}..HEAD))
-[ ${#parsed_revs[@]} = 0 ] && parsed_revs=(HEAD ^HEAD^)
+parsed_revs=$(git rev-parse --default HEAD "$@") || exit
 
 commit="%C(auto)%h"
 format_good="$commit %Cgreen✓%Creset%C(auto)%d %s"
@@ -28,5 +22,5 @@ while read -r rev; do
     esac
 
     git --no-pager log --format="$format" -1 $rev
-done < <(git rev-list "${parsed_revs[@]}" ) \
+done < <(git rev-list $parsed_revs) \
     | git_pager
