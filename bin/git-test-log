@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+SUBDIRECTORY_OK=1
+. $(git --exec-path)/git-sh-setup
+
 # If no commits specified, we default to HEAD@{u}..HEAD. However if HEAD is uptodate,
 # then `rev-parse` returns nothing. In that case we fallback to HEAD^..HEAD.
 # XXX: This breaks if `some-other-brach@{u}..some-other-brach` is specified.
@@ -24,5 +27,6 @@ while read -r rev; do
         unknown) format="$format_unknown" ;;
     esac
 
-    git log --format="$format" -1 $rev 
-done < <(git rev-list "${parsed_revs[@]}" )
+    git --no-pager log --format="$format" -1 $rev
+done < <(git rev-list "${parsed_revs[@]}" ) \
+    | git_pager
