@@ -4,9 +4,7 @@ SUBDIRECTORY_OK=1
 . $(git --exec-path)/git-sh-setup
 
 get_base_dir() {
-    link_dir="$(dirname "${BASH_SOURCE[0]}")"
-    link_target="$link_dir/$(readlink "${BASH_SOURCE[0]}")"
-    (cd "$(dirname "$link_target")/.." && pwd)
+    (cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." && pwd)
 }
 base="$(get_base_dir)"
 
