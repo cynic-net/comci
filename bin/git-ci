@@ -9,6 +9,8 @@ get_base_dir() {
 base="$(get_base_dir)"
 
 log() {
+    local test_name=default
+    [ _-t = _"$1" ] && { test_name="$2"; shift; shift; }
     parsed_revs=$(git rev-parse --default HEAD "$@") || exit
 
     commit="%C(auto)%h"
@@ -17,7 +19,8 @@ log() {
     format_unknown="$commit%Creset %C(auto)?%d %s"
 
     while read -r rev; do
-        test_status=$(git notes --ref=refs/notes/tests/default  show "$rev^{tree}" 2>/dev/null)
+        test_status=$(git 2>/dev/null notes \
+            --ref=refs/notes/tests/"$test_name" show "$rev^{tree}")
         [ $? = 0 ] || test_status=unknown
 
         format=
