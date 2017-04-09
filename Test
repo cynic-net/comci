@@ -2,8 +2,17 @@
 set -e
 
 export base_dir="$(cd "$(dirname "$0")" && pwd -P)"
+export test_dir="$base_dir/.test"
+export test_fixture_dir="$test_dir/fixture"
 
 ############################################################
+
+# Test must never modify fixtures; they should make copies
+# and modify those.
+#
+build_test_fixtures() {
+    mkdir -p "$test_fixture_dir"
+}
 
 run_unit_tests() { 
     go test ./...
@@ -22,6 +31,8 @@ run_integration_tests() {
 ############################################################
 
 cd "$base_dir"
+rm -rf "$test_dir"
+build_test_fixtures
 #run_unit_tests
 run_integration_tests
 
