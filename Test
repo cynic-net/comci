@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+set -e
+
+export base_dir="$(cd "$(dirname "$0")" && pwd -P)"
+
+############################################################
+
+run_unit_tests() { 
+    go test ./...
+}
+
+run_integration_tests() {
+    output="$(go run git-ci.go)"
+    expected="Ha ha ha!"
+    [ "$expected" = "$output" ] || {
+        echo " FAILURE:"
+        echo "Expected: $expected"
+        echo "  Actual: $output"
+    }
+}
+
+############################################################
+
+cd "$base_dir"
+#run_unit_tests
+run_integration_tests
+
+# XXX Don't do this by default or you may overwrite a different
+# version of git-ci.
+#
+# go install ./...
