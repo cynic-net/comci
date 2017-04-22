@@ -59,7 +59,7 @@ run() {
     # Worktree may have been at a different commit from where we were
     # and git-test has strange format requirements.
     git checkout "$HEAD"
-    "$base/git-test/bin/git-test" run "$@"
+    "$base/git-test/bin/git-test" run -k "$@"
 }
 
 action="$1"; shift
