@@ -8,7 +8,7 @@ get_base_dir() {
 }
 base="$(get_base_dir)"
 
-log() {
+do_log() {
     local test_name=default
     [ _-t = _"$1" ] && { test_name="$2"; shift; shift; }
     parsed_revs=$(git rev-parse --default HEAD "$@") || exit
@@ -64,15 +64,16 @@ try_git_worktree() {
     git checkout "$HEAD"
 }
 
-run() {
+do_test() {
     try_git_worktree
     exec "$base/git-test/bin/git-test" run -k "$@"
 }
 
 action="$1"; shift
 case "$action" in
-    log) log "$@"                                           ;;
-    run) run "$@"                                           ;;
-      *) exec "$base/git-test/bin/git-test" "$action" "$@"  ;;
+    log)    do_log "$@"                                         ;;
+    run)    die "use 'git ci test' instead"                     ;;
+    test)   do_test "$@"                                        ;;
+      *)    exec "$base/git-test/bin/git-test" "$action" "$@"   ;;
 esac
 
