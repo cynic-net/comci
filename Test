@@ -7,6 +7,24 @@ export test_fixture_dir="$test_dir/fixture"
 
 ############################################################
 
+git2go_base="$base_dir/vendor/git"
+libgit2_pkg_cfg_dir="$git2go_base/vendor/libgit2/build/"
+export PKG_CONFIG_PATH="$git2go_pkg_cfg_dir:$PKG_CONFIG_PATH"
+
+# XXX git2go seems to want us to sprinkle these flags everywhere. There's got to
+# be a better way?
+git2go_flags="--tags static"
+
+build_libgit2() {
+    [ -f "$libgit2_pkg_cfg_dir/libgit2.pc" ] || (
+        cd $git2go_base
+        git submodule update --init
+        make install-static
+    )
+}
+
+############################################################
+
 # Test must never modify fixtures; they should make copies
 # and modify those.
 #
@@ -15,11 +33,11 @@ build_test_fixtures() {
 }
 
 run_unit_tests() { 
-    go test ./...
+    go test $git2go_flags ./...
 }
 
 run_integration_tests() {
-    output="$(go run git-ci.go)"
+    output="$(go run $git2go_flags git-ci.go)"
     expected="Ha ha ha!"
     [ "$expected" = "$output" ] || {
         echo " FAILURE:"
@@ -32,6 +50,7 @@ run_integration_tests() {
 
 cd "$base_dir"
 rm -rf "$test_dir"
+build_libgit2
 build_test_fixtures
 #run_unit_tests
 run_integration_tests
