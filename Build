@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+base_dir="$(cd "$(dirname "$0")"; pwd -P)"
+
+cd "$base_dir"
+exec stack test --verbosity silent
