@@ -25,6 +25,8 @@ executable git-ci
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N
   build-depends:       base
                      , git-ci
+                     , gitlib
+                     , gitlib-libgit2
   default-language:    Haskell2010
 
 test-suite git-ci-test
