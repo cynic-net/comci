@@ -2,5 +2,8 @@
 
 base_dir="$(cd "$(dirname "$0")"; pwd -P)"
 
+verbosity=warn        # silent, error, warn, info, debug
+[ _"$1" == _-v ] && { verbosity=info; shift; }
+
 cd "$base_dir"
-exec stack test --verbosity silent
+exec stack -j 8 --verbosity $verbosity test
