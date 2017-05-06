@@ -1,0 +1,4 @@
+# pack-refs with: peeled fully-peeled 
+70fd9b1c5a49ccf825a780a46d33072c067bf586 refs/heads/japanese
+afde33d89ac407ead9d5f9a9039190f567d2e480 refs/heads/master
+eb8fb0ae06089fcd05b168f61ef8027a78507476 refs/heads/orphant
