@@ -24,6 +24,7 @@ executable git-ci
   main-is:             Main.hs
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N
   build-depends:       base
+                     , text
                      , git-ci
                      , gitlib
                      , gitlib-libgit2
