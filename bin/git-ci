@@ -44,11 +44,21 @@ log_commit() {
     git --no-pager log --format="$format" -1 $rev
 }
 
+test_commit() {
+    "$base/git-test/bin/git-test" run -t "$test_name" -k "$@"
+}
+
+do_test() {
+    local test_name=default
+    [ _-t = _"$1" ] && { test_name="$2"; shift; shift; }
+    for_each_rev test_commit --default HEAD "$@"
+}
+
 action="$1"; shift
 case "$action" in
     log)    do_log "$@"                                         ;;
     run)    die "use 'git ci test' instead"                     ;;
-    test)   exec "$base/git-test/bin/git-test" run -k "$@"      ;;
+    test)   do_test "$@"                                         ;;
       *)    exec "$base/git-test/bin/git-test" "$action" "$@"   ;;
 esac
 
