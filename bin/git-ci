@@ -29,6 +29,12 @@ do_log() {
     for_each_rev log_commit --default HEAD "$@"
 }
 
+test_status() {
+    git 2>/dev/null \
+        notes --ref=refs/notes/tests/"$test_name" show "$1^{tree}" \
+        || echo 'unknown'
+}
+
 log_commit() {
     local rev="$1"
     local format_commit format_good format_bad format_unknown
@@ -37,17 +43,13 @@ log_commit() {
     format_bad="$format_commit %C(reverse red)✗%Creset%C(auto)%d %s"
     format_unknown="$format_commit%Creset %C(auto)?%d %s"
 
-    test_status=$(git 2>/dev/null notes \
-        --ref=refs/notes/tests/"$test_name" show "$rev^{tree}")
-    [ $? = 0 ] || test_status=unknown
-
     format=
-    case "$test_status" in
+    case "$(test_status "$rev")" in
         good)    format="$format_good" ;;
         bad)     format="$format_bad" ;;
         unknown) format="$format_unknown" ;;
+        *)       err "INTERNAL ERROR: Bad test_status: $test_status"
     esac
-
     git --no-pager log --format="$format" -1 $rev
 }
 
