@@ -9,7 +9,7 @@ get_base_dir() {
 base="$(get_base_dir)"
 
 do_log() {
-    local test_name=default
+    local test_name=default commit format_good format_bad format_unknown
     [ _-t = _"$1" ] && { test_name="$2"; shift; shift; }
     parsed_revs=$(git rev-parse --default HEAD "$@") || exit
 
