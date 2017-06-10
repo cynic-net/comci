@@ -10,6 +10,11 @@ get_base_dir() {
 }
 base="$(get_base_dir)"
 
+err() {
+    echo >&2 "git ci: $@"
+    exit 1
+}
+
 for_each_rev() {
     local function=$1; shift
     local rev
@@ -53,6 +58,8 @@ test_commit() {
 do_test() {
     local test_name=default
     [ _-t = _"$1" ] && { test_name="$2"; shift; shift; }
+    local test_command=$(git config --get "test.$test_name.command")
+    [[ -n $test_command ]] || err "No test '$test_name'"
     for_each_rev test_commit --default HEAD "$@"
 }
 
