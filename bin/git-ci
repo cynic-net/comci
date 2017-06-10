@@ -8,31 +8,40 @@ get_base_dir() {
 }
 base="$(get_base_dir)"
 
+for_each_rev() {
+    local function=$1; shift
+    local rev
+    parsed_revs=$(git rev-parse "$@") || exit
+    while read -r rev; do $function "$rev"; done \
+        < <(git rev-list $parsed_revs) | git_pager
+}
+
 do_log() {
-    local test_name=default commit format_good format_bad format_unknown
+    local test_name=default
     [ _-t = _"$1" ] && { test_name="$2"; shift; shift; }
-    parsed_revs=$(git rev-parse --default HEAD "$@") || exit
+    for_each_rev log_commit --default HEAD "$@"
+}
 
-    commit="%C(auto)%h"
-    format_good="$commit %Cgreen✓%Creset%C(auto)%d %s"
-    format_bad="$commit %C(reverse red)✗%Creset%C(auto)%d %s"
-    format_unknown="$commit%Creset %C(auto)?%d %s"
+log_commit() {
+    local rev="$1"
+    local format_commit format_good format_bad format_unknown
+    format_commit="%C(auto)%h"
+    format_good="$format_commit %Cgreen✓%Creset%C(auto)%d %s"
+    format_bad="$format_commit %C(reverse red)✗%Creset%C(auto)%d %s"
+    format_unknown="$format_commit%Creset %C(auto)?%d %s"
 
-    while read -r rev; do
-        test_status=$(git 2>/dev/null notes \
-            --ref=refs/notes/tests/"$test_name" show "$rev^{tree}")
-        [ $? = 0 ] || test_status=unknown
+    test_status=$(git 2>/dev/null notes \
+        --ref=refs/notes/tests/"$test_name" show "$rev^{tree}")
+    [ $? = 0 ] || test_status=unknown
 
-        format=
-        case "$test_status" in
-            good)    format="$format_good" ;;
-            bad)     format="$format_bad" ;;
-            unknown) format="$format_unknown" ;;
-        esac
+    format=
+    case "$test_status" in
+        good)    format="$format_good" ;;
+        bad)     format="$format_bad" ;;
+        unknown) format="$format_unknown" ;;
+    esac
 
-        git --no-pager log --format="$format" -1 $rev
-    done < <(git rev-list $parsed_revs) \
-        | git_pager
+    git --no-pager log --format="$format" -1 $rev
 }
 
 action="$1"; shift
