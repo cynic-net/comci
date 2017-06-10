@@ -35,45 +35,11 @@ do_log() {
         | git_pager
 }
 
-create_worktree() {
-    # XXX: If there are multiple worktrees, should we use the current one,
-    # or the original one?
-    cd_to_toplevel
-
-    # XXX: Should we make sure somehow that this is ignored, or use /tmp?
-    git worktree add --detach "tmp/ci"
-}
-
-try_git_worktree() {
-    PATH="$(git --exec-path):$PATH" type git-worktree 2>/dev/null >/dev/null \
-        || return
-
-    HEAD=$(git rev-parse HEAD)
-
-    local worktree_gitdir_info_file=$(git rev-parse --git-path worktrees/ci/gitdir)
-    [ ! -f "$worktree_gitdir_info_file" ] && create_worktree
-    local worktree_gitdir=$(cat "$worktree_gitdir_info_file")
-    [ ! -f "$worktree_gitdir" ] && create_worktree
-
-    cd "$(dirname "$worktree_gitdir")"
-    require_work_tree_exists || die "XXX: This should not happen"
-    require_clean_work_tree "ci run" "Please commit or stash them"
-
-    # Worktree may have been at a different commit from where we were
-    # and git-test has strange format requirements.
-    git checkout "$HEAD"
-}
-
-do_test() {
-    try_git_worktree
-    exec "$base/git-test/bin/git-test" run -k "$@"
-}
-
 action="$1"; shift
 case "$action" in
     log)    do_log "$@"                                         ;;
     run)    die "use 'git ci test' instead"                     ;;
-    test)   do_test "$@"                                        ;;
+    test)   exec "$base/git-test/bin/git-test" run -k "$@"      ;;
       *)    exec "$base/git-test/bin/git-test" "$action" "$@"   ;;
 esac
 
