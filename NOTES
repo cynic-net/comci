@@ -10,12 +10,20 @@ The results of test runs should be stored in a way that can be
 transferered between repos; using a git branch is the obvious way to
 do this.
 
-A particular test result is identified by
-  * the tree object from which the working copy was created
-    (we do not store results of tests on dirty working copies)
-  * the test that was run (if we have multiple groups of tests, e.g. slow/fast)
-  * the worktree in which the test was run, identified by ???
-    (maybe host, path to tree, user name, ???)
+A particular test result is identified by:
+
+  1. The name of the test suite. (LV1: n dozen)
+  2. The tree object from which the working copy was created.
+     (We do not store results of tests on dirty working copies.)
+     (LV2: 26*26 = ~1k, LV3: <5k)
+  3. The worktree in which the test was run, identified by:
+       a. User name (or name of test system)
+       b. Host identifier of some sort (Name? MAC address?)
+       c. Path to tree or hash of it or whatever?
+     (LV4: ~100)
+
+LVn indicates the directory tree level within a tree object and the
+approximate count of files within it.
 
 A test result should store, beyond the identification info above:
   * Host and user running test
