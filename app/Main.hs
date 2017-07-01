@@ -25,7 +25,7 @@ main =
         return ()
     where
         opts = RepositoryOptions
-            { repoPath = "test/fixture/repo00.git"
+            { repoPath = "fixture/repo00.git"
             , repoWorkingDir = Nothing
             , repoIsBare = True
             , repoAutoCreate = False
