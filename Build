@@ -6,4 +6,4 @@ verbosity=warn        # silent, error, warn, info, debug
 [ _"$1" == _-v ] && { verbosity=info; shift; }
 
 cd "$base_dir"
-exec stack -j 8 --verbosity $verbosity build --test
+exec stack -j 8 --verbosity $verbosity build --test "$@"
