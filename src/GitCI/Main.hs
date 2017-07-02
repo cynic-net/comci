@@ -1,6 +1,6 @@
 {-# Language OverloadedStrings #-}
 
-module Main where
+module GitCI.Main where
 
 import Control.Monad.IO.Class
 import Git
