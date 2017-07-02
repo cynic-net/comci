@@ -3,6 +3,9 @@
 module Test where
 
 import Test.Framework
+import Test.Framework.BlackBoxTest
 import {-@ HTF_TESTS @-} SampleTest
 
-main = htfMain htf_importedTests    -- htf_thisModulesTests
+main = do
+    bbts <- blackBoxTests "bbt" "sh" ".cmd" defaultBBTArgs
+    htfMain (htf_importedTests ++ [makeTestSuite "bbts" bbts])

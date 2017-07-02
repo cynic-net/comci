@@ -2,14 +2,26 @@
 
 module GitCI.Main where
 
+import System.Environment (getArgs)
+import System.IO (hPutStrLn, stderr)
+import System.Exit (ExitCode (ExitFailure), exitWith)
+
 import Control.Monad.IO.Class
 import Git
 import Git.Libgit2
 import Data.Maybe
-import Data.Text
+import Data.Text (unpack)
 
 main :: IO ()
 main =
+     do args <- getArgs
+        case args of
+             []        -> grovelInRepo
+             otherwise -> do
+                 hPutStrLn stderr $ "Unknown option: " ++ head args
+                 exitWith $ ExitFailure 2
+
+grovelInRepo =
     withRepository' lgFactory opts $ do
         mRef <- resolveReference "HEAD"
         let ref = fromMaybe (error "HEAD doesn't exist") mRef
