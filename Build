@@ -6,4 +6,12 @@ verbosity=warn        # silent, error, warn, info, debug
 [ _"$1" == _-v ] && { verbosity=info; shift; }
 
 cd "$base_dir"
-exec stack -j 8 --verbosity $verbosity build --test "$@"
+rm -f .test-output
+stack -j 8 --verbosity $verbosity \
+    build --test --test-arguments '-q --color=true -o .test-output' "$@"
+exit_code=$?
+[[ $exit_code -ne 0 && -e .test-output ]] && {
+    cat .test-output
+    echo $'\nFAILED: Test output is in .test-output'
+}
+exit $exit_code
