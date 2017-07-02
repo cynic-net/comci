@@ -30,13 +30,14 @@ executable git-ci
                      , gitlib-libgit2
   default-language:    Haskell2010
 
-test-suite git-ci-test
-    type:               detailed-0.9
+test-suite git-ci-test-suite
+    main-is:            Test.hs
+    ghc-options:        -main-is Test
+    other-modules:      Sample, SampleTest
     hs-source-dirs:     src
-    test-module:        Test.Top
+    type:               exitcode-stdio-1.0
     default-language:   Haskell2010
-    build-depends:      base, Cabal
-                   -- , git-ci
+    build-depends:      HTF, base
 
 source-repository head
   type:     git
