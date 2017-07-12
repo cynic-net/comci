@@ -17,9 +17,30 @@ main =
      do args <- getArgs
         case args of
              []        -> grovelInRepo
+             ["log"]   -> do
+                             gitCiLog
              otherwise -> do
                  hPutStrLn stderr $ "Unknown option: " ++ head args
                  exitWith $ ExitFailure 2
+
+formatCommit commitOid = do commit <- lookupCommit commitOid
+                            liftIO $ putStrLn $ (show commitOid)
+                                      ++ " " ++ (unpack $ commitLog commit)
+                            formatCommit $ head (commitParents commit)
+
+gitCiLog =
+    withRepository' lgFactory opts $ do
+        mRef <- resolveReference "HEAD"
+        let ref = fromMaybe (error "HEAD doesn't exist") mRef
+        commitOid <- parseObjOid $ renderOid ref
+        formatCommit commitOid
+    where
+        opts = RepositoryOptions
+            { repoPath = "."
+            , repoWorkingDir = Nothing
+            , repoIsBare = True
+            , repoAutoCreate = False
+            }
 
 grovelInRepo =
     withRepository' lgFactory opts $ do
