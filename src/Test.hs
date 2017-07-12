@@ -7,5 +7,5 @@ import Test.Framework.BlackBoxTest
 import {-@ HTF_TESTS @-} SampleTest
 
 main = do
-    bbts <- blackBoxTests "bbt" "sh" ".cmd" defaultBBTArgs
+    bbts <- blackBoxTests "bbt" "sh" ".sh" defaultBBTArgs
     htfMain (htf_importedTests ++ [makeTestSuite "bbts" bbts])
