@@ -8,7 +8,7 @@ import System.Exit (ExitCode (ExitFailure), exitWith)
 
 import Control.Monad.IO.Class
 import Git
-import Git.Libgit2
+import Git.Libgit2 (lgFactory)
 import Data.Maybe
 import Data.Text (unpack)
 
