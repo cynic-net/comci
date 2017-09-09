@@ -10,6 +10,33 @@ The results of test runs should be stored in a way that can be
 transferered between repos; using a git branch is the obvious way to
 do this.
 
+Intended Interface
+------------------
+
+-   `git ci list [options]`: List the tests and reports in the repository.
+    Without options, just prints out the names. With option `--verbose` prints
+    out command and dependencies. Option `--deps`/`--recursive` also calls
+    `git ci list $@` on the test dependencies?
+
+-   `git ci run [options] [rev-spec]* [--] <test-name>*`: Run a specified test
+    on the revisions (defaults to `HEAD`). If the tests dependencies haven't
+    haven't been run yet, then run those first (unless the option `--no-deps` is
+    given). Test results are recorded using the recording scheme below. By
+    default will not rerun tests that results exist for, option `--force` will
+    override existing test-results.
+
+-   `git ci show [commit-ish] <report-name>*`: Show the output of tests
+    `<test-name>*` on commit `[commit-ish]`. Defaults to `HEAD`.
+
+-   `git ci log [options] [rev-spec]* [--] <report-name>*`: Runs `git log` but
+    appends test results. Takes a superset of the options of `git log`.
+
+-   `git ci forget [rev-spec]* [--] <test-name>*`: Removes specified recorded
+    test-results from repository.
+
+Recording Test Results
+----------------------
+
 A particular test result is identified by:
 
   1. The name of the test suite. (LV1: n dozen)
@@ -54,7 +81,6 @@ branches under `git-ci/` for results so that results not merged into
 `git-ci/master` are not missed.
 
 [worktree]: https://git-scm.com/docs/git-worktree
-
 
 Different Tests
 ---------------
