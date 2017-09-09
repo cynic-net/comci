@@ -1,0 +1,9 @@
+[submodule "bats"]
+	path = bats
+	url = https://github.com/sstephenson/bats/
+[submodule "tests/bats-support"]
+	path = tests/bats-support
+	url = https://github.com/ztombol/bats-support/
+[submodule "tests/bats-assert"]
+	path = tests/bats-assert
+	url = https://github.com/ztombol/bats-assert/
