@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+set -e
+
+USAGE='[help]'
+LONG_USAGE='git ci help
+    print this long help message'
+
+OPTIONS_SPEC=
+
+. git-sh-setup
+
+case "$#" in
+    0) usage ;;
+    *) cmd="$1"; shift
+       case "$cmd" in
+           help) git ci -h ;;
+           *)    usage ;;
+       esac
+esac

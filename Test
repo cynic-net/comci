@@ -1,3 +1,4 @@
 #!/usr/bin/env bash
 
+export PATH="$(pwd)/bin:$PATH"
 bats/bin/bats "${@:-tests/}"
