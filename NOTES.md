@@ -34,6 +34,57 @@ Intended Interface
 -   `git ci forget [rev-spec]* [--] <test-name>*`: Removes specified recorded
     test-results from repository.
 
+Configuration Format
+--------------------
+
+The file `config` on `refs/ci/config` will specify the configuration to run
+`git ci` with. It uses the git configuration format. Two types of entries are
+supported, the `test` entry and the `report` entry. Every `test` entry is also
+implicitly a `report` entry.
+
+### Tests
+
+Tests are commands which are to be executed against work-trees of the specified
+commits. They implicitly have a `report` associated with them. Test results are
+stored by `git ci` in `refs/ci/results`.
+
+Here is an example of specifying tests:
+
+```
+[test "units"]
+    command = ./Build test-units
+
+[test "integration"]
+    command = ./Build test-all
+    deps = units
+```
+
+This says that the test name `units` is run with the command
+`./Build test-units`. Similarly for `integration`, but also it's specified that
+this test should not be run without results for `units` being preset.
+
+### Reports
+
+Reports are used to display test results for `git ci log`. Each test entry has
+an implicit report which is just the output of the test. Results of reports are
+not stored anywhere.
+
+Exit codes that are non-zero indicate fatal errors with generating the report
+itself, not the status of the tests passing or not.
+
+Here is an example of specifying a report:
+
+```
+[report "performance"]
+    command = summarize-performance
+    deps = integration
+```
+
+This specifies that the report `performance` calls the script
+`summarize-performance` which is stored in `refs/ci/config` in the `/bin`
+directory. It will be called with the `[commit-ish]` that `git ci log`
+calculates.
+
 Recording Test Results
 ----------------------
 
