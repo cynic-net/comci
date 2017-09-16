@@ -1,19 +1,60 @@
 #!/usr/bin/env bash
 set -e
 
-USAGE='[help]'
-LONG_USAGE='git ci help
-    print this long help message'
+# Usage/Git Setup
+# ---------------
+
+USAGE='[help|list]'
+LONG_USAGE='git ci <command>
+    help:   print this long help message
+    l,list: list available tests'
 
 OPTIONS_SPEC=
 
-. git-sh-setup
+. "$(git --exec-path)/git-sh-setup"
 
-case "$#" in
-    0) usage ;;
-    *) cmd="$1"; shift
-       case "$cmd" in
-           help) git ci -h ;;
-           *)    usage ;;
-       esac
+# Utilities
+# ---------
+
+die()  { echo "==   fatal: $@"; exit 1 ; }
+warn() { echo "== warning: $@"; }
+
+# Configuration Parsing
+# ---------------------
+
+parse_config() {
+    test_names=()
+    test_commands=()
+    local old_IFS="$IFS"
+    while read test_line; do
+        IFS='. '
+        test_line=( $test_line )
+        [[ "${test_line[0]}" == "test"    ]] || die  "Malformed configuration entry! '${test_line[@]}'"
+        [[ "${test_line[2]}" == "command" ]] || warn "Unsupported test option: '${test_line[2]}' (${test_line[@]})"
+        test_names+=("${test_line[1]}")
+        IFS=' '
+        test_commands+=("${test_line[*]:3}")
+    done
+    IFS="$old_IFS"
+}
+
+# List Tests
+# ----------
+
+list_tests() {
+    parse_config < <(git cat-file blob 'refs/ci/config:config' | git config --file=- --get-regexp 'test.*')
+    for test in ${test_names[@]}; do echo $test; done
+}
+
+# Main
+# ----
+
+[[ "$1" == "--define-functions-only" ]] && return
+[[ "$#" == '0' ]] && usage
+
+cmd="$1" && shift
+case "$cmd" in
+    help)   git ci -h ;;
+    l|list) list_tests "$@" ;;
+    *)      usage ;;
 esac
