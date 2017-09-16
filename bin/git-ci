@@ -19,8 +19,17 @@ OPTIONS_SPEC=
 die()  { echo "==   fatal: $@"; exit 1 ; }
 warn() { echo "== warning: $@"; }
 
+config_branch=refs/ci/config
+
 # Configuration Parsing
 # ---------------------
+
+check_config_exists() {
+    git show-ref --quiet --verify "$config_branch" \
+        || die "Couldn't find ref $config_branch"
+    git cat-file -e "$config_branch:config" 2>/dev/null \
+        || die "config file doesn't exist on $config_branch"
+}
 
 parse_config() {
     test_names=()
@@ -42,7 +51,8 @@ parse_config() {
 # ----------
 
 list_tests() {
-    parse_config < <(git cat-file blob 'refs/ci/config:config' | git config --file=- --get-regexp 'test.*')
+    check_config_exists
+    parse_config < <(git cat-file blob "$config_branch:config" | git config --file=- --get-regexp 'test.*')
     for test in ${test_names[@]}; do echo $test; done
 }
 

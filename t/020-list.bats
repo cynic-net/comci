@@ -12,7 +12,7 @@ init_repo() {
     rm -rf "$test_repo"
     git clone --quiet t/fixtures/repo$repo_num.git "$test_repo"
     cd "$test_repo"
-    git config --local remote.origin.fetch '+refs/ci/config:refs/ci/config'
+    git config --local remote.origin.fetch '+refs/ci/*:refs/ci/*'
     git fetch --quiet
 }
 
@@ -53,4 +53,17 @@ EOF
     assert_output "test-pass
 test-fail"
     assert_success
+}
+
+@test "git ci list: fail on non-existant configuration" {
+    init_repo 00
+    run git ci list
+    assert_output "==   fatal: Couldn't find ref refs/ci/config"
+    assert_failure
+
+    git update-ref refs/ci/config @
+    run git ci list
+    assert_output "==   fatal: config file doesn't exist on refs/ci/config"
+    assert_failure
+
 }
