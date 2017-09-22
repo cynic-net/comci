@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
 
+git submodule update --init
+
 export PATH="$(pwd)/bin:$PATH"
 bats/bin/bats "${@:-t/}"
