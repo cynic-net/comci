@@ -1,5 +1,4 @@
-load 'bats-assert/load'
-load 'bats-support/load'
+load 'test-lib'
 
 @test "git-ci prints help message" {
     run git ci
