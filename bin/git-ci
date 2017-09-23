@@ -36,28 +36,35 @@ check_config_exists() {
         || die "config file doesn't exist on branch $config_branch"
 }
 
-parse_config() {
+cat_config() {
+    git cat-file blob "$config_branch:config"
+}
+
+set_test_names() {
+    check_config_exists
     test_names=()
-    test_commands=()
-    local old_IFS="$IFS"
-    while read test_line; do
-        IFS='. '
-        test_line=( $test_line )
-        [[ "${test_line[0]}" == "test"    ]] || die  "Malformed configuration entry! '${test_line[@]}'"
-        [[ "${test_line[2]}" == "command" ]] || warn "Unsupported test option: '${test_line[2]}' (${test_line[@]})"
-        test_names+=("${test_line[1]}")
-        IFS=' '
-        test_commands+=("${test_line[*]:3}")
-    done
-    IFS="$old_IFS"
+    while read test_name; do
+        local test_name_no_prefix="${test_name#test.}"
+        local test_name_untested="${test_name_no_prefix%.command}"
+        if echo "$test_name_untested" | grep ' ' &>/dev/null; then
+            warn "Invalid test name: '$test_name_untested'"
+        else
+            test_names+=("$test_name_untested")
+        fi
+    done < <( cat_config | git config --file=- --name-only --get-regexp 'test\..*\.command' )
+}
+
+get_test_command() {
+    check_config_exists
+    local test_name="$1"; shift
+    cat_config | git config --file=- --get "test.$test_name.command"
 }
 
 # List Tests
 # ----------
 
 list_tests() {
-    check_config_exists
-    parse_config < <(git cat-file blob "$config_branch:config" | git config --file=- --get-regexp 'test.*')
+    set_test_names
     for test in ${test_names[@]}; do echo $test; done
 }
 
