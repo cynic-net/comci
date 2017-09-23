@@ -35,7 +35,8 @@ EOF
     init_repo config
     run git ci list
     assert_output "test-pass
-test-fail"
+test-fail
+check-status"
     assert_success
 }
 
