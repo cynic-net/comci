@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+cd "$(dirname "$0")"
+for fixture in $(find -type d -iname '*.git'); do
+    ( cd "$fixture"
+      git gc --aggressive
+    )
+    git add "$fixture"
+done
