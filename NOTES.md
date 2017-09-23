@@ -34,6 +34,9 @@ Intended Interface
 -   `git ci forget [rev-spec]* [--] <test-name>*`: Removes specified recorded
     test-results from repository.
 
+-   `git ci config`: Takes all the normal `git config` options but applies them
+    to file `config` on branch `ci/config`.
+
 Configuration Format
 --------------------
 
