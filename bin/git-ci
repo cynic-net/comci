@@ -71,12 +71,39 @@ list_tests() {
 # Run Tests
 # ---------
 
+run_test() {
+    revision="$1"; shift
+    test_name="$1"; shift
+
+    local tmp_dir="$(mktemp --directory)"
+    local status=0
+    trap "rm -rf '$tmp_dir'" 0
+    (   set -e
+        export GIT_WORK_TREE="$tmp_dir"
+        git read-tree "$revision"
+        git checkout-index --all
+        cd "$tmp_dir"
+        sh -c "$test_command"
+    )
+}
+
 run_tests() {
     local revision="$1"  && shift || die "'git ci run' requires a revision and a test-name"
     local test_name="$1" && shift || die "'git ci run' requires a revision and a test-name"
     [[ "$#" == '0' ]]             || die "Too many arguments"
-    echo "$revision $test_name"
-    exit 1
+
+    git cat-file -e "$revision" 2>/dev/null \
+        || die "Bad revision: $revision"
+
+    test_command="$(get_test_command "$test_name")" \
+        || die "Bad test name: $test_name"
+
+    status='0'
+    run_test "$revision" "$test_command" || status="$?"
+    case "$status" in
+        0) echo "passed: $test_name on $revision"; return 0 ;;
+        *) echo "failed: $test_name on $revision"; return 1 ;;
+    esac
 }
 
 # Main
