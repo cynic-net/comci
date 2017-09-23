@@ -31,8 +31,8 @@ EOF
 # functional tests
 # ----------------
 
-@test "git ci list: repo01" {
-    init_repo 01
+@test "git ci list: repo-config" {
+    init_repo config
     run git ci list
     assert_output "test-pass
 test-fail"
@@ -40,7 +40,7 @@ test-fail"
 }
 
 @test "git ci list: fail on non-existant configuration" {
-    init_repo 00
+    init_repo no-config
     run git ci list
     assert_output "==   fatal: Couldn't find ref refs/ci/config"
     assert_failure
