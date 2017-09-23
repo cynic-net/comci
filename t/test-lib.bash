@@ -12,6 +12,7 @@ init_repo() {
     rm -rf "$test_repo"
     git clone --quiet t/fixtures/repo-$repo_name.git "$test_repo"
     cd "$test_repo"
-    git config --local remote.origin.fetch '+refs/ci/*:refs/ci/*'
     git fetch --quiet
+    git show-ref --quiet --verify refs/remotes/origin/ci/config || return 0
+    git branch --quiet ci/config origin/ci/config
 }

@@ -37,10 +37,10 @@ Intended Interface
 Configuration Format
 --------------------
 
-The file `config` on `refs/ci/config` will specify the configuration to run
-`git ci` with. It uses the git configuration format. Two types of entries are
-supported, the `test` entry and the `report` entry. Every `test` entry is also
-implicitly a `report` entry.
+The file `config` on `ci/config` will specify the configuration to run `git ci`
+with. It uses the git configuration format. Two types of entries are supported,
+the `test` entry and the `report` entry. Every `test` entry is also implicitly a
+`report` entry.
 
 ### Tests
 
@@ -81,9 +81,8 @@ Here is an example of specifying a report:
 ```
 
 This specifies that the report `performance` calls the script
-`summarize-performance` which is stored in `refs/ci/config` in the `/bin`
-directory. It will be called with the `[commit-ish]` that `git ci log`
-calculates.
+`summarize-performance` which is stored in `ci/config` in the `/bin` directory.
+It will be called with the `[commit-ish]` that `git ci log` calculates.
 
 Recording Test Results
 ----------------------

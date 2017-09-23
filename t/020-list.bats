@@ -42,12 +42,12 @@ test-fail"
 @test "git ci list: fail on non-existant configuration" {
     init_repo no-config
     run git ci list
-    assert_output "==   fatal: Couldn't find ref refs/ci/config"
+    assert_output "==   fatal: Couldn't find branch ci/config"
     assert_failure
 
-    git update-ref refs/ci/config @
+    git branch ci/config @
     run git ci list
-    assert_output "==   fatal: config file doesn't exist on refs/ci/config"
+    assert_output "==   fatal: config file doesn't exist on branch ci/config"
     assert_failure
 
 }

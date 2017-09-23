@@ -19,16 +19,16 @@ OPTIONS_SPEC=
 die()  { echo "==   fatal: $@"; exit 1 ; }
 warn() { echo "== warning: $@"; }
 
-config_branch=refs/ci/config
+config_branch=ci/config
 
 # Configuration Parsing
 # ---------------------
 
 check_config_exists() {
-    git show-ref --quiet --verify "$config_branch" \
-        || die "Couldn't find ref $config_branch"
+    git show-ref --quiet --verify "refs/heads/$config_branch" \
+        || die "Couldn't find branch $config_branch"
     git cat-file -e "$config_branch:config" 2>/dev/null \
-        || die "config file doesn't exist on $config_branch"
+        || die "config file doesn't exist on branch $config_branch"
 }
 
 parse_config() {
