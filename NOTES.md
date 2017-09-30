@@ -144,8 +144,3 @@ record which version of that "./Other-test" file was used.
 
 Probably the version of the configuration used should be recorded in the test
 result.
-
-Possibly we could include extra scripts in the configuration branch mentioned
-above, or have some sort of configuration directive that says, "take these files
-from the tree objects of these commits and add them to the working copy of the
-commit we're testing." (This is a bit like `git submodule`.)
