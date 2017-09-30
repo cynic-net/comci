@@ -88,6 +88,12 @@ This specifies that the report `performance` calls the script
 `summarize-performance` which is stored in `ci/config` in the `/bin` directory.
 It will be called with the `[commit-ish]` that `git ci log` calculates.
 
+### Future
+
+The revspec that a test should be run on should be recorded in the
+`ci/config:config`. This would allow specifying how far back a test should be
+considered valid.
+
 Recording Test Results
 ----------------------
 
@@ -133,12 +139,3 @@ branches under `git-ci/` and merges can be done to `git-ci/master` less
 frequently by whichever hosts find it convenient to do that. Programs that
 process test results will always look at all branches under `git-ci/` for
 results so that results not merged into `git-ci/master` are not missed.
-
-Different Tests
----------------
-
-What commits (commit ranges) tests can be run on should be recorded in the
-config. One problem is that you might create a new test, "./Other-test" in a
-commit and want to run that test in previous commits. We need a way to add that
-"./Other-test" file to the tree of previous commits when we do the test run, and
-record which version of that "./Other-test" file was used.
