@@ -9,10 +9,18 @@ each also running tests, and so on.
 The results of test runs should be stored in a way that can be transferered
 between repos; using a git branch is the obvious way to do this.
 
+Test results are added to the "distributed database" of test results by
+commiting on the test result branches for that repo under `git-ci`. Each
+worktree commits test results to its own individual subdir so that merges can
+always be done automatically. Test results can be put on any branch under
+`git-ci`.
+
 [worktree]: https://git-scm.com/docs/git-worktree
 
 Intended Interface
 ------------------
+
+### Command Line
 
 -   `git ci list [options]`: List the tests and reports in the repository.
     Without options, just prints out the names. With option `--verbose` prints
@@ -37,6 +45,20 @@ Intended Interface
 
 -   `git ci config`: Takes all the normal `git config` options but applies them
     to file `config` on branch `ci/config`.
+
+### Workflow
+
+Small groups where test results are pushed less frequently would probably have
+everybody committing results on to `git-ci/master`; if a new comit can't be
+pushed, the committer can pull, merge or rebase his results on to
+`remote/git-ci/master` and push it up with little likelyhood that during this
+time someone else will have pushed new commits on to that branch.
+
+Large groups with a high rate of adding test results can commit to different
+branches under `git-ci/` and merges can be done to `git-ci/master` less
+frequently by whichever hosts find it convenient to do that. Programs that
+process test results will always look at all branches under `git-ci/` for
+results so that results not merged into `git-ci/master` are not missed.
 
 Configuration Format
 --------------------
@@ -121,21 +143,3 @@ A test result should store, beyond the identification info above:
 -   pass/fail status
 -   stdout/stderr
 -   commit sha of configuration branch used
-
-Test results are added to the "distributed database" of test results by
-commiting on the test result branches for that repo under `git-ci`. Each
-worktree commits test results to its own individual subdir so that merges can
-always be done automatically. Test results can be put on any branch under
-`git-ci`.
-
-Small groups where test results are pushed less frequently would probably have
-everybody committing results on to `git-ci/master`; if a new comit can't be
-pushed, the committer can pull, merge or rebase his results on to
-`remote/git-ci/master` and push it up with little likelyhood that during this
-time someone else will have pushed new commits on to that branch.
-
-Large groups with a high rate of adding test results can commit to different
-branches under `git-ci/` and merges can be done to `git-ci/master` less
-frequently by whichever hosts find it convenient to do that. Programs that
-process test results will always look at all branches under `git-ci/` for
-results so that results not merged into `git-ci/master` are not missed.
