@@ -9,11 +9,10 @@ each also running tests, and so on.
 The results of test runs should be stored in a way that can be transferered
 between repos; using a git branch is the obvious way to do this.
 
-Test results are added to the "distributed database" of test results by
-commiting on the test result branches for that repo under `git-ci`. Each
-worktree commits test results to its own individual subdir so that merges can
-always be done automatically. Test results can be put on any branch under
-`git-ci`.
+Individual machines can contribute to the "distributed database" of test results
+by commiting to the test result branches under `refs/ci/results`. Each worktree
+commits test results to its own individual subdir so that merges can always be
+done automatically.
 
 [worktree]: https://git-scm.com/docs/git-worktree
 
@@ -48,17 +47,21 @@ Intended Interface
 
 ### Workflow
 
-Small groups where test results are pushed less frequently would probably have
-everybody committing results on to `git-ci/master`; if a new comit can't be
-pushed, the committer can pull, merge or rebase his results on to
-`remote/git-ci/master` and push it up with little likelyhood that during this
-time someone else will have pushed new commits on to that branch.
+Test results can be put on any branch under `refs/ci/results`. People can choose
+their own branch structure underneath `refs/ci/results` (depending on
+organization size/needs).
 
-Large groups with a high rate of adding test results can commit to different
-branches under `git-ci/` and merges can be done to `git-ci/master` less
-frequently by whichever hosts find it convenient to do that. Programs that
-process test results will always look at all branches under `git-ci/` for
-results so that results not merged into `git-ci/master` are not missed.
+Small groups where test results are pushed less frequently would probably have
+everybody committing results on to `refs/ci/results/master`; if a new comit
+can't be pushed, the committer can pull, merge or rebase his results on to
+`refs/remotes/ci/results/master` and push it up with little likelyhood that
+during this time someone else will have pushed new commits on to that branch.
+
+In larger groups, test results can be committed to different branches under
+`refs/ci/results` and merged back into `refs/ci/results/master` by whichever
+hosts find it convenient to do that. Programs that process test results can
+always look at all branches under `refs/ci/results` for results so that results
+not merged into `refs/ci/results/master` are not missed.
 
 Configuration Format
 --------------------
