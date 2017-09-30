@@ -52,7 +52,7 @@ their own branch structure underneath `refs/ci/results` (depending on
 organization size/needs).
 
 Small groups where test results are pushed less frequently would probably have
-everybody committing results on to `refs/ci/results/master`; if a new comit
+everybody committing results on to `refs/ci/results/master`; if a new commit
 can't be pushed, the committer can pull, merge or rebase his results on to
 `refs/remotes/ci/results/master` and push it up with little likelyhood that
 during this time someone else will have pushed new commits on to that branch.
@@ -124,10 +124,9 @@ Recording Test Results
 
 A particular test result is identified by:
 
-1.  The name of the test suite. (LV1: n dozen)
-2.  The tree object from which the working copy was created.
-    (We do not store results of tests on dirty working copies.)
-    (LV2: 26*26 = ~1k, LV3: <5k)
+1.  The tree object from which the working copy was created. We do not store
+    results of tests on dirty working copies. (LV1: 26*26 = ~1k, LV3: <5k)
+2.  The name of the test suite. (LV2: n dozen)
 3.  The worktree in which the test was run, identified by:
     a.  User name (or name of test system)
     b.  Host identifier of some sort (Name? MAC address?)
@@ -137,12 +136,22 @@ A particular test result is identified by:
 LVn indicates the directory tree level within a tree object and the approximate
 count of files within it.
 
-A test result should store, beyond the identification info above:
+When doing `git ci show`, the user is asking for (potentially) multiple test
+results from a given commit, so we want to be able to quickly access multiple
+test-names within a given tree. When doing a `git ci log`, the revision list
+(and then tree list) will be calculated ahead of time, then multiple test
+results will be accessed for each tree in order (so we still want faster access
+to results by test name).
 
--   Host and user running test
--   git author?
--   Host configuration (OS and tools version etc.)
--   env vars
--   pass/fail status
--   stdout/stderr
--   commit sha of configuration branch used
+Currently, we are identifying test results by tree SHA and test name. The
+structure is `refs/ci/results/*:tree-sha/test-name` -- we don't store
+host/worktree information. The `*` allows the user to specify test result branch
+structure they want to use.
+
+The test results should contain (in principle, though needs may differ):
+
+-   Relevant host configuration (OS and tools version etc.)
+-   A dump of environment variables.
+-   Test pass/fail status.
+-   stdout/stderr of test runs.
+-   SHA of `refs/ci/config:config`.
