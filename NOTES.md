@@ -136,18 +136,14 @@ results so that results not merged into `git-ci/master` are not missed.
 Different Tests
 ---------------
 
-The "test that was run" can be recorded as the command that was run (e.g.,
-"./Test --units-only", "rake test", etc.). But we probably want some way of
-assigning short names to these commands; local (per-repo) configuration might do
-for this, or we might have a separate branch that contains the configuration
-file, configuring the short names, commands, and what commits (commit ranges)
-these commands can be run on. Probably the version of the configuration used
-should be recorded in the test result.
-
-One problem is that you might create a new test, "./Other-test" in a commit and
-want to run that test in previous commits. We need a way to add that
+What commits (commit ranges) tests can be run on should be recorded in the
+config. One problem is that you might create a new test, "./Other-test" in a
+commit and want to run that test in previous commits. We need a way to add that
 "./Other-test" file to the tree of previous commits when we do the test run, and
 record which version of that "./Other-test" file was used.
+
+Probably the version of the configuration used should be recorded in the test
+result.
 
 Possibly we could include extra scripts in the configuration branch mentioned
 above, or have some sort of configuration directive that says, "take these files
