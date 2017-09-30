@@ -114,6 +114,7 @@ A test result should store, beyond the identification info above:
 -   env vars
 -   pass/fail status
 -   stdout/stderr
+-   commit sha of configuration branch used
 
 Test results are added to the "distributed database" of test results by
 commiting on the test result branches for that repo under `git-ci`. Each
@@ -141,6 +142,3 @@ config. One problem is that you might create a new test, "./Other-test" in a
 commit and want to run that test in previous commits. We need a way to add that
 "./Other-test" file to the tree of previous commits when we do the test run, and
 record which version of that "./Other-test" file was used.
-
-Probably the version of the configuration used should be recorded in the test
-result.
