@@ -4,11 +4,11 @@ load 'test-lib'
     . bin/git-ci --define-functions-only
     init_repo config
 
-    run cat_test_results master d2359a2 check-status
+    run cat_test_results master d2359a2 check-status exit-code
     assert_success
     assert_output '0'
 
-    run cat_test_results master 305871d check-status
+    run cat_test_results master 305871d check-status exit-code
     assert_success
     assert_output '1'
 }
