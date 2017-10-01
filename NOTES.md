@@ -92,6 +92,8 @@ This says that the test name `units` is run with the command
 `./Build test-units`. Similarly for `integration`, but also it's specified that
 this test should not be run without results for `units` being preset.
 
+TODO: Clarify the test names that we allow (and potentially restrict them more).
+
 ### Reports
 
 Reports are used to display test results for `git ci log`. Each test entry has
