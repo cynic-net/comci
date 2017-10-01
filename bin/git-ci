@@ -75,7 +75,7 @@ run_test() {
     revision="$1"; shift
     test_name="$1"; shift
 
-    local tmp_dir="$(mktemp --directory)"
+    local tmp_dir="$(mktemp --directory tmp.git-ci.XXXXXXXXXX)"
     local status=0
     trap "rm -rf '$tmp_dir'" 0
     (   set -e
