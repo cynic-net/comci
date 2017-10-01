@@ -36,5 +36,5 @@ load 'test-lib'
 
     run git ci show 1111111 check-status
     assert_failure
-    assert_output -p 'Bad revision: 1111111'
+    assert_output --partial 'Bad revision: 1111111'
 }

@@ -10,7 +10,7 @@ load test-lib
 
     run set_test_names
     assert_success
-    assert_output -p "Invalid test name: 'test name with spaces'"
+    assert_output --partial "Invalid test name: 'test name with spaces'"
 
     set_test_names &>/dev/null
 
