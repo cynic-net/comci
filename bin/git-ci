@@ -4,7 +4,7 @@ set -e
 # Usage/Git Setup
 # ---------------
 
-USAGE='[help|list|run]'
+USAGE='[help|list|run|show]'
 LONG_USAGE='git ci help
     print this long help message
 
@@ -12,7 +12,10 @@ git ci (l|list)
     list available tests
 
 git ci (r|run) <revision> <test-name>
-    run specified test against revision'
+    run specified test against revision
+
+git ci (s|show) <revision> <test-name>*
+    show results of tests on specified revision'
 
 OPTIONS_SPEC=
 
