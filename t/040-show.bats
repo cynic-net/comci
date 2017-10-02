@@ -18,13 +18,19 @@ load 'test-lib'
 
     run git ci show d2359a2 check-status
     assert_success
-    assert_output 'exit-status: 0'
+    assert_output 'd2359a2 - test (new), status (new): add passing test
+
+        ### refs/ci/results/master:d2359a2/check-status/exit-code
+
+        0'
 
     run git ci show 305871d check-status
     assert_success
-    assert_output 'exit-code:
+    assert_output '305871d - status: failing test
 
-1'
+        ### refs/ci/results/master:305871d/check-status/exit-code
+
+        1'
 
     run git ci show 45feee8 check-status
     assert_success
