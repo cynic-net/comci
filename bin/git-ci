@@ -99,7 +99,7 @@ format_results() {
 show_results() {
     local test_branch='master'
     local commitish="$1"; shift
-    local format="format:%w(80,0,8)%C(bold green)%h$C(reset) - %C(dim blue)%s%C(reset)"
+    local format="format:%w(80,0,8)%C(bold green)%h%C(reset) - %C(dim blue)%s%C(reset)"
     git log -1 --pretty="$format
 $(format_results $test_branch $commitish "$@")"
 }
