@@ -21,6 +21,9 @@ Intended Interface
 
 ### Command Line
 
+-   `git ci init`: Creates `refs/ci/config:config`, an empty config file for the
+    repository to use.
+
 -   `git ci list [options]`: List the tests and reports in the repository.
     Without options, just prints out the names. With option `--verbose` prints
     out command and dependencies. Option `--deps`/`--recursive` also calls
