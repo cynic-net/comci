@@ -39,9 +39,8 @@ check_config_exists() {
         || die "config file doesn't exist on branch $config_branch"
 }
 
-cat_config() {
-    git cat-file blob "$config_branch:config"
-}
+cat_config() { git cat-file blob "$config_branch:config" ; }
+ci_config()  { cat_config | git config --file=- "$@"     ; }
 
 set_test_names() {
     check_config_exists
@@ -54,13 +53,13 @@ set_test_names() {
         else
             test_names+=("$test_name_untested")
         fi
-    done < <( cat_config | git config --file=- --name-only --get-regexp 'test\..*\.command' )
+    done < <( ci_config --name-only --get-regexp 'test\..*\.command' )
 }
 
 get_test_command() {
     check_config_exists
     local test_name="$1"; shift
-    cat_config | git config --file=- --get "test.$test_name.command"
+    ci_config --get "test.$test_name.command"
 }
 
 # List Tests
@@ -150,9 +149,10 @@ run_tests() {
 
 cmd="$1" && shift
 case "$cmd" in
-    help)   git ci -h ;;
-    l|list) list_tests   "$@" ;;
-    r|run)  run_tests    "$@" ;;
-    s|show) show_results "$@" ;;
-    *)      usage ;;
+    help)     git ci -h ;;
+    l|list)   list_tests   "$@" ;;
+    c|config) ci_config    "$@" ;;
+    r|run)    run_tests    "$@" ;;
+    s|show)   show_results "$@" ;;
+    *)        usage ;;
 esac
