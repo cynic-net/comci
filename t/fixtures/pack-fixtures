@@ -5,7 +5,7 @@ for fixture in $(find -type d -iname '*.git'); do
     ( cd "$fixture"
       rm -rf hooks description info/exclude
       touch refs/.keep
-      git gc --aggressive
+      git gc --aggressive --prune=all
     )
     git add "$fixture"
 done
