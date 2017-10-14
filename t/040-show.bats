@@ -1,18 +1,5 @@
 load 'test-lib'
 
-@test "cat_test_results" {
-    . bin/git-ci --define-functions-only
-    init_repo config
-
-    run cat_test_results master d2359a2 check-status exit-code
-    assert_output '0'
-    assert_success
-
-    run cat_test_results master 305871d check-status exit-code
-    assert_output '1'
-    assert_success
-}
-
 @test "git ci show ... check-status" {
     init_repo config
 
