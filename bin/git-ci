@@ -97,7 +97,11 @@ format_results() {
 
 show_results() {
     local test_branch='master'
+
     local commitish="$1"; shift
+    git cat-file -e "${commitish}^{commit}" \
+        || die "Not a commit: ${commitish}"
+
     local format="%w(80,0,8)%h - %s"
     git log -1 "$commitish" --pretty="format:$format
 $(format_results $test_branch $commitish "$@")"

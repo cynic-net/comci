@@ -32,6 +32,10 @@ load 'test-lib'
 
         1'
 
+    run git ci show 1111111 check-status
+    assert_failure
+    assert_output --partial 'Not a commit: 1111111'
+
     run git ci show 45feee8 check-status
     assert_success
     assert_output 'No results recorded.'
@@ -40,7 +44,4 @@ load 'test-lib'
     assert_failure
     assert_output 'Bad test name: bad-test-name'
 
-    run git ci show 1111111 check-status
-    assert_failure
-    assert_output --partial 'Bad revision: 1111111'
 }
