@@ -5,15 +5,11 @@ load 'test-lib'
 
     run git ci run
     assert_failure
-    assert_output --partial "'git ci run' requires a revision and a test-name"
+    assert_output --partial "'git ci run' requires a revision and a list of test-names"
 
     run git ci run foo
     assert_failure
-    assert_output --partial "'git ci run' requires a revision and a test-name"
-
-    run git ci run 1 2 3 4
-    assert_failure
-    assert_output --partial "Too many arguments"
+    assert_output "fatal: Bad revision: foo"
 }
 
 @test "git ci run invalid revision/test name" {
@@ -50,4 +46,49 @@ load 'test-lib'
     run git ci run 305871d check-status
     assert_failure
     assert_output --partial 'failed:'
+}
+
+@test "git ci run ... checking formatting" {
+    init_repo run
+
+    run git ci show introduce-tests test1
+    assert_output --partial 'No results'
+    run git ci show introduce-tests test2
+    assert_output --partial 'No results'
+
+    run git ci run introduce-tests test1 test2
+    assert_output \
+'a9c15b1 test-1 fails, test-2 succeeds, each writing to stderr and stdout
+
+== running: test1
+
+FLAMPing FLORMPLE
+FATAL: FLORMPLE not FLAMPED
+
+== failed: test1 on introduce-tests
+
+
+a9c15b1 test-1 fails, test-2 succeeds, each writing to stderr and stdout
+
+== running: test2
+
+FLORMPLing FLAMPs
+warn: too much sunshine.
+Done.
+
+== passed: test2 on introduce-tests'
+    assert_failure
+
+    run git ci run test1-now-passing test2
+    assert_output \
+'214e1af test-1: passing: FLAMPing FLORMPLE
+
+== running: test2
+
+FLORMPLing FLAMPs
+warn: too much sunshine.
+Done.
+
+== passed: test2 on test1-now-passing'
+    assert_success
 }

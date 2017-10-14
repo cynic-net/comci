@@ -120,8 +120,10 @@ show_results() {
 # ---------
 
 run_test() {
-    revision="$1"; shift
-    test_name="$1"; shift
+    local revision="$1"  ; shift
+    local test_name="$1" ; shift
+
+    local test_command="$(get_test_command "$test_name")"
 
     local tmp_dir="$(mktemp --directory tmp.git-ci.XXXXXXXXXX)"
     local status=0
@@ -136,22 +138,32 @@ run_test() {
 }
 
 run_tests() {
-    local revision="$1"  && shift || die "'git ci run' requires a revision and a test-name"
-    local test_name="$1" && shift || die "'git ci run' requires a revision and a test-name"
-    [[ "$#" == '0' ]]             || die "Too many arguments"
+    local revision="$1" && shift || die "'git ci run' requires a revision and a list of test-names"
 
     git cat-file -e "$revision" 2>/dev/null \
         || die "Bad revision: $revision"
 
-    test_command="$(get_test_command "$test_name")" \
-        || die "Bad test name: $test_name"
+    check_tests_exist "$@"
+    local status_acc='0'
+    for test_name in "$@"; do
+        git log -1 "$revision" --oneline
+        echo
+        echo "== running: $test_name"
+        echo
 
-    status='0'
-    run_test "$revision" "$test_command" || status="$?"
-    case "$status" in
-        0) echo "passed: $test_name on $revision"; return 0 ;;
-        *) echo "failed: $test_name on $revision"; return 1 ;;
-    esac
+        local status='0'
+        run_test "$revision" "$test_name" || status="$?"
+        echo
+        if [[ "$status" == '0' ]]; then
+            echo "== passed: $test_name on $revision"
+        else
+            echo "== failed: $test_name on $revision"
+            status_acc='1'
+        fi
+        echo
+        echo
+    done
+    exit "$status_acc"
 }
 
 # Main
