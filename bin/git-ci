@@ -85,13 +85,15 @@ cat_test_results() {
 format_results() {
     local test_branch="$1"; shift
     local commitish="$1"; shift
+    local treeish=$(git rev-parse "$commitish^{tree}")
 
+    echo
     for test_name in "$@"; do
         local status_name='exit-code'
         echo
-        echo "### refs/ci/results/$test_branch:$commitish/$test_name/$status_name"
+        echo "    ### refs/ci/results/$test_branch:$treeish/$test_name/$status_name"
         echo
-        echo "$(cat_test_results $test_branch $commitish $test_name $status_name)"
+        echo "    $(cat_test_results $test_branch $commitish $test_name $status_name)"
     done
 }
 
@@ -103,8 +105,8 @@ show_results() {
         || die "Not a commit: ${commitish}"
 
     local format="%w(80,0,8)%h - %s"
-    git log -1 "$commitish" --pretty="format:$format
-$(format_results $test_branch $commitish "$@")"
+    git log -1 "$commitish" --pretty="format:$format"
+    format_results $test_branch $commitish "$@"
 }
 
 # Run Tests

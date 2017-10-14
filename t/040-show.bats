@@ -20,17 +20,17 @@ load 'test-lib'
     assert_success
     assert_output 'd2359a2 - test (new), status (new): add passing test
 
-        ### refs/ci/results/master:d2359a2/check-status/exit-code
+    ### refs/ci/results/master:2dc7858d38de371cb2c1ca87e6c081e3a5638ea3/check-status/exit-code
 
-        0'
+    0'
 
     run git ci show 305871d check-status
     assert_success
     assert_output '305871d - status: failing test
 
-        ### refs/ci/results/master:305871d/check-status/exit-code
+    ### refs/ci/results/master:28695280d933cd06665790c54e379d18849924c4/check-status/exit-code
 
-        1'
+    1'
 
     run git ci show 1111111 check-status
     assert_failure
@@ -43,5 +43,4 @@ load 'test-lib'
     run git ci show 305871d bad-test-name
     assert_failure
     assert_output 'Bad test name: bad-test-name'
-
 }
