@@ -48,13 +48,19 @@ load 'test-lib'
     assert_output --partial 'failed:'
 }
 
-@test "git ci run ... checking formatting" {
+
+
+@test "git ci run ... introduce-tests" {
     init_repo run
+
+### Check that there are no results recorded
 
     run git ci show introduce-tests test1
     assert_output --partial 'No results'
     run git ci show introduce-tests test2
     assert_output --partial 'No results'
+
+### Run test1, test2 on introduce-tests
 
     run git ci run introduce-tests test1 test2
     assert_output \
@@ -78,6 +84,37 @@ Done.
 
 == passed: test2 on introduce-tests'
     assert_failure
+
+### Check that results are recorded now
+
+    run git ci show introduce-tests test1 test2
+    assert_output \
+'a9c15b1 - test-1 fails, test-2 succeeds, each writing to stderr and stdout
+
+### refs/ci/results/master:99afc201fbee690562b1a35cc722b11dc22e9a9b/test1/exit-code
+
+No results.
+
+a9c15b1 - test-1 fails, test-2 succeeds, each writing to stderr and stdout
+
+### refs/ci/results/master:99afc201fbee690562b1a35cc722b11dc22e9a9b/test2/exit-code
+
+No results.'
+}
+
+
+
+@test "git ci run ... test1-now-passing" {
+    init_repo run
+
+### Check that there are no results recorded
+
+    run git ci show test1-now-passing test1
+    assert_output --partial 'No results'
+    run git ci show test1-now-passing test2
+    assert_output --partial 'No results'
+
+### Run test2 on test1-now-passing
 
     run git ci run test1-now-passing test2
     assert_output \
