@@ -70,6 +70,13 @@ list_tests() {
     for test in ${test_names[@]}; do echo $test; done
 }
 
+check_tests_exist() {
+    for test_name in "$@"; do
+        get_test_command "$test_name" &>/dev/null \
+            || die "Bad test name: $test_name"
+    done
+}
+
 # Show Tests
 # ----------
 
@@ -99,6 +106,8 @@ show_results() {
         || die "Not a commit: ${commitish}"
 
     local format="%w(80,0,8)%h - %s"
+
+    check_tests_exist "$@"
 
     for test_name in "$@"; do
         git log -1 "$commitish" --pretty="format:$format"

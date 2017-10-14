@@ -24,10 +24,14 @@ load 'test-lib'
     assert_failure
 
     run git ci show 45feee8 check-status
-    assert_output 'No results recorded.'
+    assert_output '45feee8 - 
+
+    ### refs/ci/results/master:4b825dc642cb6eb9a060e54bf8d69288fbee4904/check-status/exit-code
+
+    No results.'
     assert_success
 
     run git ci show 305871d bad-test-name
-    assert_output 'Bad test name: bad-test-name'
+    assert_output 'fatal: Bad test name: bad-test-name'
     assert_failure
 }
