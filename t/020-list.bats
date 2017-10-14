@@ -40,7 +40,7 @@ load test-lib
 @test "git ci list: repo-config" {
     init_repo config
     run git ci list
-    assert_output "== warning: Invalid test name: 'test name with spaces'
+    assert_output "warning: Invalid test name: 'test name with spaces'
 test-pass
 test-fail
 failing-subcommand
@@ -55,12 +55,12 @@ test.slash"
 @test "git ci list: fail on non-existant configuration" {
     init_repo no-config
     run git ci list
-    assert_output "==   fatal: Couldn't find branch ci/config"
+    assert_output "fatal: Couldn't find branch ci/config"
     assert_failure
 
     git branch ci/config @
     run git ci list
-    assert_output "==   fatal: config file doesn't exist on branch ci/config"
+    assert_output "fatal: config file doesn't exist on branch ci/config"
     assert_failure
 
 }
