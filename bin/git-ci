@@ -125,7 +125,7 @@ run_test() {
 
     local test_command="$(get_test_command "$test_name")"
 
-    local tmp_dir="$(mktemp --directory tmp.git-ci.XXXXXXXXXX)"
+    local tmp_dir="$(mktemp --tmpdir --directory git-ci.XXXXXXXXXX)"
     local status=0
     trap "rm -rf '$tmp_dir'" 0
     (   set -e
