@@ -95,26 +95,23 @@ check_tests_exist() {
 # ----------
 
 format_result() {
-    local test_branch="$1"; shift
     local commitish="$1"; shift
     local test_name="$1"; shift
     local treeish=$(git rev-parse "$commitish^{tree}")
     local status_name='exit-code'
 
     echo
-    echo "    ### refs/ci/results/$test_branch:$treeish/$test_name/$status_name"
+    echo "    ### $results_ref:$treeish/$test_name/$status_name"
     echo
     ### Grrrr, shouldn't -e suppress output for us?
-    if git cat-file -e "refs/ci/results/$test_branch:$treeish/$test_name/$status_name" &>/dev/null; then
-        echo "    $(git cat-file blob "refs/ci/results/$test_branch:$treeish/$test_name/$status_name")"
+    if git cat-file -e "$results_ref:$treeish/$test_name/$status_name" &>/dev/null; then
+        echo "    $(git cat-file blob "$results_ref:$treeish/$test_name/$status_name")"
     else
         echo "    No results."
     fi
 }
 
 show_results() {
-    local test_branch='master'
-
     local commitish="$1"; shift
     git cat-file -e "${commitish}^{commit}" \
         || die "Not a commit: ${commitish}"
@@ -124,9 +121,10 @@ show_results() {
     check_tests_exist "$@"
 
     for test_name in "$@"; do
-        git log -1 "$commitish" --pretty="format:$format"
+        git --no-pager log -1 "$commitish" --pretty="format:$format"
         echo
-        format_result $test_branch $commitish "$test_name"
+        format_result $commitish "$test_name"
+        echo
     done
 }
 
