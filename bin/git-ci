@@ -28,6 +28,7 @@ die()  { echo "fatal: $@" 1>&2 ; exit 1 ; }
 warn() { echo "warning: $@" 1>&2 ; }
 
 config_branch=ci/config
+results_ref=refs/ci/results/master
 
 # Configuration Parsing
 # ---------------------
@@ -60,6 +61,19 @@ get_test_command() {
     check_config_exists
     local test_name="$1"; shift
     ci_config --get "test.$test_name.command"
+}
+
+# Initialize git ci
+# -----------------
+
+ci_init() {
+    ! git show-ref --quiet --verify "$results_ref" \
+        || die "git ci allready init-ed"
+
+    local empty_tree_sha="$(git hash-object -w -t tree /dev/null)"
+    local init_commit_sha="$(git commit-tree -m 'Initilizing git ci' "$empty_tree_sha")"
+
+    git update-ref -m 'git-ci init' "$results_ref" "$init_commit_sha"
 }
 
 # List Tests
@@ -175,6 +189,7 @@ run_tests() {
 cmd="$1" && shift
 case "$cmd" in
     help)     git ci -h ;;
+    i|init)   ci_init      "$@" ;;
     l|list)   list_tests   "$@" ;;
     c|config) ci_config    "$@" ;;
     r|run)    run_tests    "$@" ;;
