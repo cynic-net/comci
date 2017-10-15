@@ -52,6 +52,7 @@ load 'test-lib'
 
 @test "git ci run ... introduce-tests" {
     init_repo run
+    git ci init
 
 ### Check that there are no results recorded
 
@@ -91,21 +92,22 @@ Done.
     assert_output \
 'a9c15b1 - test-1 fails, test-2 succeeds, each writing to stderr and stdout
 
-### refs/ci/results/master:99afc201fbee690562b1a35cc722b11dc22e9a9b/test1/exit-code
+    ### refs/ci/results/master:99afc201fbee690562b1a35cc722b11dc22e9a9b/test1/exit-code
 
-No results.
+    1
 
 a9c15b1 - test-1 fails, test-2 succeeds, each writing to stderr and stdout
 
-### refs/ci/results/master:99afc201fbee690562b1a35cc722b11dc22e9a9b/test2/exit-code
+    ### refs/ci/results/master:99afc201fbee690562b1a35cc722b11dc22e9a9b/test2/exit-code
 
-No results.'
+    0'
 }
 
 
 
 @test "git ci run ... test1-now-passing" {
     init_repo run
+    git ci init
 
 ### Check that there are no results recorded
 
