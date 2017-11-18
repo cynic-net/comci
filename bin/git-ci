@@ -68,7 +68,7 @@ get_test_command() {
 
 ci_init() {
     ! git show-ref --quiet --verify "$results_ref" \
-        || die "git ci allready init-ed"
+        || die "git ci already init-ed"
 
     local empty_tree_sha="$(git hash-object -w -t tree /dev/null)"
     local init_commit_sha="$(git commit-tree -m 'Initilizing git ci' "$empty_tree_sha")"
