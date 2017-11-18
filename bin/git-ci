@@ -161,13 +161,16 @@ run_test() {
     local test_command="$(get_test_command "$test_name")"
 
     local tmp_dir="$(mktemp --tmpdir --directory git-ci.XXXXXXXXXX)"
+    local tmp_worktree="$tmp_dir/worktree"
+    mkdir -p "$tmp_worktree"
+
     local status=0
     trap "rm -rf '$tmp_dir'" 0
     (   set -e
-        export GIT_WORK_TREE="$tmp_dir"
+        export GIT_WORK_TREE="$tmp_worktree"
         git read-tree "$commitish"
         git checkout-index --all
-        cd "$tmp_dir"
+        cd "$tmp_worktree"
         sh -c "$test_command"
     ) || status="$?"
 
