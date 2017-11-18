@@ -16,19 +16,24 @@ done automatically.
 
 [worktree]: https://git-scm.com/docs/git-worktree
 
-Intended Interface
-------------------
+Interface
+---------
 
-### Command Line
+### Partially Implemented
 
 -   `git ci init`: Creates `refs/ci/config:config`, an empty config file for the
     repository to use. Also creates `refs/ci/results/master` with an empty
     initial commit.
 
+    -   Currently only creates `refs/ci/results/master`, but should also create
+        `refs/ci/config`.
+
 -   `git ci list [options]`: List the tests and reports in the repository.
     Without options, just prints out the names. With option `--verbose` prints
     out command and dependencies. Option `--deps`/`--recursive` also calls
     `git ci list $@` on the test dependencies?
+
+    -   None of the `[options]` are implemented.
 
 -   `git ci run [options] [rev-spec]* [--] <test-name>*`: Run a specified test
     on the revisions (defaults to `HEAD`). If the tests dependencies haven't
@@ -37,17 +42,32 @@ Intended Interface
     default will not rerun tests that results exist for, option `--force` will
     override existing test-results.
 
+    -   Currently only records exit codes, should record stdout/stderr.
+    -   Currently only takes `[revision]`, generalize to `[rev-spec]`.
+
 -   `git ci show [commit-ish] <report-name>*`: Show the output of tests
     `<test-name>*` on commit `[commit-ish]`. Defaults to `HEAD`.
+
+    -   Does not default to `HEAD` if no `commit-ish` supplied.
+    -   Does not default to all tests if no `report-name` supplied.
+
+-   `git ci config [options]`: Takes all the normal `git config` options but
+    applies them to file `config` on branch `ci/config`.
+
+    -   Currently only able to read config file, not write to it.
+
+### Unimplemented
 
 -   `git ci log [options] [rev-spec]* [--] <report-name>*`: Runs `git log` but
     appends test results. Takes a superset of the options of `git log`.
 
+-   `git ci pull/push [options]`: Push/pull results to remote. Takes same
+    options as `git push/pull`?
+
 -   `git ci forget [rev-spec]* [--] <test-name>*`: Removes specified recorded
     test-results from repository.
 
--   `git ci config`: Takes all the normal `git config` options but applies them
-    to file `config` on branch `ci/config`.
+-   `git ci prune` forget results for unreachable commits
 
 ### Workflow
 
