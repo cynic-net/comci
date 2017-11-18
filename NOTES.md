@@ -16,6 +16,16 @@ done automatically.
 
 [worktree]: https://git-scm.com/docs/git-worktree
 
+### Outstanding Issues
+
+-   We are using the name `exit-code` and `exit_status` to refer to the same
+    thing in `bin/git-ci`.
+
+-   Fix the `submodule` issue. Possibly by using `git clone` to create a
+    worktree?
+
+-   Cleanup the temporary directories/files used for running tests?
+
 Interface
 ---------
 
