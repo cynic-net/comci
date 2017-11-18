@@ -128,6 +128,28 @@ show_results() {
     done
 }
 
+# Recording Results
+# -----------------
+
+export_temp_index() {
+    export GIT_INDEX_FILE="$(mktemp --tmpdir git-ci.tmp-index.XXXXXXXXX)"
+    git-read-tree "$results_ref"
+}
+
+add_to_index() { # args: tree entry name, path to data
+    local entry_data_path="$1" ; shift
+    local entry_file_path="$1" ; shift
+    local entry_sha="$(git hash-object -t blob -w "$entry_data_path")"
+    echo -e "100644 blob $entry_sha\t$entry_file_path" \
+        | git update-index --index-info
+}
+
+commit_index() {
+    local tree_sha="$(git write-tree)"
+    local commit_sha="$(git commit-tree "$tree_sha" -p "$results_ref" "$@")"
+    git update-ref "$results_ref" "$commit_sha"
+}
+
 # Run Tests
 # ---------
 
@@ -141,7 +163,6 @@ run_test() {
     local tmp_dir="$(mktemp --tmpdir --directory git-ci.XXXXXXXXXX)"
     local status=0
     trap "rm -rf '$tmp_dir'" 0
-    status='0'
     (   set -e
         export GIT_WORK_TREE="$tmp_dir"
         git read-tree "$commitish"
@@ -150,14 +171,9 @@ run_test() {
         sh -c "$test_command"
     ) || status="$?"
 
-    (   export GIT_INDEX_FILE="$(mktemp --tmpdir git-ci.tmp-index.XXXXXXXXX)"
-        local exit_status_sha="$(echo "$status" | git hash-object -t blob -w --stdin)"
-        git-read-tree "$results_ref"
-        echo -e "100644 blob $exit_status_sha\t$treeish/$test_name/exit-code" \
-            | git update-index --index-info
-        local tree_sha="$(git write-tree)"
-        local commit_sha="$(git commit-tree "$tree_sha" -p "$results_ref" -m "git ci test results: $treeish/$test_name/exit-code")"
-        git update-ref "$results_ref" "$commit_sha"
+    (   export_temp_index
+        add_to_index <(echo "$status") "$treeish/$test_name/exit-code"
+        commit_index -m "git ci test results: $treeish/$test_name"
     )
     return "$status"
 }
