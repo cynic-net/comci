@@ -159,6 +159,7 @@ run_test() {
 
     local tmp_dir="$(mktemp --tmpdir --directory git-ci.XXXXXXXXXX)"
     local tmp_worktree="$tmp_dir/worktree"
+    local tmp_output="$tmp_dir/output"
     mkdir -p "$tmp_worktree"
 
     local status=0
@@ -168,12 +169,13 @@ run_test() {
         git read-tree "$commitish"
         git checkout-index --all
         cd "$tmp_worktree"
-        sh -c "$test_command"
+        sh -c "$test_command" 2>&1 | tee "$tmp_output"
     ) || status="$?"
 
     (   export GIT_INDEX_FILE="$tmp_dir/index"
         git-read-tree "$results_ref"
         add_to_index <(echo "$status") "$treeish/$test_name/exit-code"
+        add_to_index "$tmp_output"     "$treeish/$test_name/output"
         commit_index -m "git ci test results: $treeish/$test_name"
     )
     return "$status"

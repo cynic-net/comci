@@ -98,7 +98,8 @@ Done.
 
     ### refs/ci/results/master:99afc201fbee690562b1a35cc722b11dc22e9a9b/test1/output
 
-    No results.
+    FLAMPing FLORMPLE
+FATAL: FLORMPLE not FLAMPED
 
 a9c15b1 - test-1 fails, test-2 succeeds, each writing to stderr and stdout
 
@@ -108,7 +109,9 @@ a9c15b1 - test-1 fails, test-2 succeeds, each writing to stderr and stdout
 
     ### refs/ci/results/master:99afc201fbee690562b1a35cc722b11dc22e9a9b/test2/output
 
-    No results.'
+    FLORMPLing FLAMPs
+warn: too much sunshine.
+Done.'
 }
 
 
@@ -137,5 +140,77 @@ warn: too much sunshine.
 Done.
 
 == passed: test2 on test1-now-passing'
+    assert_success
+}
+
+@test "git ci run ... tests-stderr" {
+    init_repo run
+    git ci init
+
+### Check that there are no results recorded
+
+    run git ci show tests-stderr test1
+    assert_output --partial 'No results'
+    run git ci show tests-stderr test2
+    assert_output --partial 'No results'
+
+### Run tests on tests-stderr
+
+    run git ci run tests-stderr test1
+    assert_output \
+'8a995c2 test1: outputting some stuff to stderr
+
+== running: test1
+
+FLAMPing FLORMPLE
+Done.
+THIS IS AN ERROR
+
+== passed: test1 on tests-stderr'
+    assert_success
+
+    run git ci run tests-stderr test2
+    assert_output \
+'8a995c2 test1: outputting some stuff to stderr
+
+== running: test2
+
+FLORMPLing FLAMPs
+warn: too much sunshine.
+Done.
+
+== passed: test2 on tests-stderr'
+    assert_success
+
+### Check that `git ci show` now agrees
+
+    run git ci show tests-stderr test1
+    assert_output \
+'8a995c2 - test1: outputting some stuff to stderr
+
+    ### refs/ci/results/master:78085be128770effc4d22880af57c4a1517cdf8e/test1/exit-code
+
+    0
+
+    ### refs/ci/results/master:78085be128770effc4d22880af57c4a1517cdf8e/test1/output
+
+    FLAMPing FLORMPLE
+Done.
+THIS IS AN ERROR'
+    assert_success
+
+    run git ci show tests-stderr test2
+    assert_output \
+'8a995c2 - test1: outputting some stuff to stderr
+
+    ### refs/ci/results/master:78085be128770effc4d22880af57c4a1517cdf8e/test2/exit-code
+
+    0
+
+    ### refs/ci/results/master:78085be128770effc4d22880af57c4a1517cdf8e/test2/output
+
+    FLORMPLing FLAMPs
+warn: too much sunshine.
+Done.'
     assert_success
 }
