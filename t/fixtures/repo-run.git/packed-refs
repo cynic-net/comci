@@ -1,5 +1,6 @@
 # pack-refs with: peeled fully-peeled 
 921a04464f382635ae670faaa26aef60095a8fb8 refs/heads/ci/config
-214e1af58cb2dbf49cb1e681dfc16ee09596c992 refs/heads/master
+8a995c221a025f73135ff9756c677101a7b36006 refs/heads/master
 a9c15b15a2f58f0913f45ebb346981fa00746ca9 refs/tags/introduce-tests
 214e1af58cb2dbf49cb1e681dfc16ee09596c992 refs/tags/test1-now-passing
+8a995c221a025f73135ff9756c677101a7b36006 refs/tags/tests-stderr
