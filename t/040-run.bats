@@ -96,11 +96,19 @@ Done.
 
     1
 
+    ### refs/ci/results/master:99afc201fbee690562b1a35cc722b11dc22e9a9b/test1/output
+
+    No results.
+
 a9c15b1 - test-1 fails, test-2 succeeds, each writing to stderr and stdout
 
     ### refs/ci/results/master:99afc201fbee690562b1a35cc722b11dc22e9a9b/test2/exit-code
 
-    0'
+    0
+
+    ### refs/ci/results/master:99afc201fbee690562b1a35cc722b11dc22e9a9b/test2/output
+
+    No results.'
 }
 
 

@@ -99,7 +99,7 @@ format_result() {
     local commitish="$1"; shift
     local test_name="$1"; shift
     local treeish=$(git rev-parse "$commitish^{tree}")
-    local status_name='exit-code'
+    local status_name="$1"; shift
 
     echo
     echo "    ### $results_ref:$treeish/$test_name/$status_name"
@@ -124,7 +124,8 @@ show_results() {
     for test_name in "$@"; do
         git --no-pager log -1 "$commitish" --pretty="format:$format"
         echo
-        format_result $commitish "$test_name"
+        format_result $commitish "$test_name" exit-code
+        format_result $commitish "$test_name" output
         echo
     done
 }
