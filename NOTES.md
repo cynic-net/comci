@@ -52,7 +52,6 @@ Interface
     default will not rerun tests that results exist for, option `--force` will
     override existing test-results.
 
-    -   Currently only records exit codes, should record stdout/stderr.
     -   Currently only takes `[revision]`, generalize to `[rev-spec]`.
 
 -   `git ci show [commit-ish] <report-name>*`: Show the output of tests
