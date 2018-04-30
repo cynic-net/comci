@@ -86,28 +86,31 @@ git_ci_last() {
     warn "No test results found between '$curr_commit..$source_commit'."
 }
 
+git_ci_diff() {
+    local source_commit_one source_commit_two
+    local tested_commit_one tested_commit_two
+
+    source_commit_one="$1" && shift
+    source_commit_two="$1" && shift
+
+    tested_commit_two="$(git_ci_get_test_results "$source_commit_two")"
+    if [[ "$source_commit_one" == '' ]]; then
+        tested_commit_one="$source_commit_two"
+    else
+        tested_commit_one="$(git_ci_get_test_results "$source_commit_one")"
+    fi
+
+    git diff "$tested_commit_one" "$tested_commit_two"
+}
+
 git_ci_show() {
     local source_commit_one source_commit_two
     local tested_commit_one tested_commit_two
-    local max_backtrack
 
-    max_backtrack='10'
+    { source_commit_one="$1" && shift ; } || source_commit_one='HEAD'
+    source_commit_two="$(git_ci_last "$source_commit_one^")"
 
-    { source_commit_one="$1" && shift ; } || source_commit_one="HEAD"
-    { source_commit_two="$1" && shift ; } || source_commit_two="$source_commit_one^"
-
-    tested_commit_one="$(git_ci_get_test_results "$source_commit_one")"
-
-    for i in $(seq 0 $max_backtrack); do
-        tested_commit_two="$(git_ci_get_test_results "$source_commit_two^$i")" || true
-        if [[ "$tested_commit_two" != '' ]]; then
-            notif "index $source_commit_two^$i..$source_commit_one"
-            git diff "$tested_commit_two" "$tested_commit_one"
-            return
-        fi
-    done
-
-    fatal "No test results found for '$source_commit_two^$max_backtrack..$source_commit_two'."
+    git_ci_diff "$source_commit_two" "$source_commit_one"
 }
 
 # Running Tests
