@@ -100,17 +100,20 @@ git_ci_diff() {
         tested_commit_one="$(git_ci_get_test_results "$source_commit_one")"
     fi
 
-    git diff "$tested_commit_one" "$tested_commit_two"
+    git diff "$tested_commit_one" "$tested_commit_two" "$@"
 }
 
 git_ci_show() {
     local source_commit_one source_commit_two
     local tested_commit_one tested_commit_two
 
-    { source_commit_one="$1" && shift ; } || source_commit_one='HEAD'
+    { source_commit_one="$1" \
+        && git rev-parse --verify --quiet "$source_commit_one" &>/dev/null \
+        && shift
+    } || source_commit_one='HEAD'
     source_commit_two="$(git_ci_last "$source_commit_one^")"
 
-    git_ci_diff "$source_commit_two" "$source_commit_one"
+    git_ci_diff "$source_commit_two" "$source_commit_one" "$@"
 }
 
 # Running Tests
@@ -180,6 +183,7 @@ case "$git_ci_command" in
     add)     git_ci_add        ;;
     commit)  git_ci_commit     ;;
     run)     git_ci_run   "$@" ;;
+    diff)    git_ci_diff  "$@" ;;
     show)    git_ci_show  "$@" ;;
     last)    git_ci_last  "$@" ;;
     *)       fatal "Unrecognized command: $git_ci_command" ;;
