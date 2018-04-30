@@ -1,0 +1,119 @@
+#!/usr/bin/env bash
+
+set -e
+# set -x
+
+git_ci_command="$1" && shift
+testset="$1"        && shift
+
+ci_ref_prefix="refs/ci/$testset"
+
+git_ci_config() {
+    git config --file='.ci' "$@"
+}
+
+git_ci_tracked_files() {
+    git_ci_config --get "test.$testset.trackedFiles"
+}
+
+git_ci_test() {
+    local test_command
+    test_command="$(git_ci_config --get "test.$testset.command")"
+    echo "== git ci: running test '$test_command'"
+    bash -c "$test_command"
+}
+
+git_ci_add() {
+    git add --force $(git_ci_tracked_files)
+}
+
+git_ci_commit() {
+    local source_commit source_tree ci_ref
+    local tested_commit tested_tree tested_commit_parent
+
+    source_commit="$(git rev-parse HEAD)"
+    source_tree="$(git rev-parse "$source_commit^{tree}")"
+    ci_ref="$ci_ref_prefix/$source_tree"
+
+    tested_tree="$(git write-tree)"
+
+    tested_commit_parent=''
+    tested_commit_parent="$(git rev-parse --verify --quiet "$ci_ref")" \
+        || tested_commit_parent="$(git commit-tree "$source_tree" -m "init $ci_ref")"
+    tested_commit="$(git commit-tree -p "$tested_commit_parent" "$tested_tree" -m "$source_commit")"
+
+    git update-ref "$ci_ref" "$tested_commit"
+}
+
+git_ci_get_test_results() {
+    local source_commit source_tree
+    source_commit="$1" && shift
+    source_tree="$(git rev-parse "$source_commit^{tree}")"
+    git rev-parse --verify --quiet "$ci_ref_prefix/$source_tree" \
+        || { echo "No test results for '$source_commit'." >&2
+             exit 1
+           }
+}
+
+git_ci_show() {
+    local source_commit_one source_commit_two
+    local tested_commit_one tested_commit_two
+
+    { source_commit_one="$1" && shift ; } || source_commit_one="HEAD"
+    { source_commit_two="$1" && shift ; } || source_commit_two="$source_commit_one^"
+
+    tested_commit_one="$(git_ci_get_test_results "$source_commit_one")"
+    tested_commit_two="$(git_ci_get_test_results "$source_commit_two")"
+
+    git diff "$tested_commit_two" "$tested_commit_one"
+}
+
+git_ci_cleanup() {
+    git reset
+    git checkout -- ./
+    git clean -dfx
+}
+
+git_ci_run() {
+    if ! git diff --quiet; then
+        echo "Must run with a clean worktree!!!"
+        exit 1
+    fi
+    git ci cleanup "$testset"
+    git ci test    "$testset"
+    git ci add     "$testset"
+    git ci commit  "$testset"
+    git ci cleanup "$testset"
+}
+
+# git_ci_init() {
+#     local init_ci="$1" && shift
+#     git branch --force "$ci_ref_prefix" "$init_ci"
+# }
+#
+# git_ci_reinit() {
+#     local last_common="$(git merge-base "$branch" "$ci_ref_prefix")"
+#     local next_ci_branch="$ci_ref_prefix"
+#     while [[ "$(git merge-base "$branch" "$next_ci_branch^")" == "$last_common" ]]; do
+#         next_ci_branch="$next_ci_branch^"
+#     done
+#     git ci init "$branch" "$testset" "$(git rev-parse $next_ci_branch)"
+# }
+
+git_ci_start() {
+    local rebase_root
+    rebase_root="$1" && shift
+    git rebase --interactive --exec "git ci run $testset || true" "$rebase_root"
+}
+
+echo "== git ci: $git_ci_command $branch $testset $@"
+case "$git_ci_command" in
+    cleanup) git_ci_cleanup    ;;
+    test)    git_ci_test       ;;
+    add)     git_ci_add        ;;
+    commit)  git_ci_commit     ;;
+    run)     git_ci_run        ;;
+    show)    git_ci_show  "$@" ;;
+    start)   git_ci_start "$@" ;;
+    *)       echo "Unrecognized git ci command: $git_ci_command..." && exit 1 ;;
+esac
