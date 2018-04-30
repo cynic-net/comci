@@ -67,6 +67,25 @@ git_ci_get_test_results() {
         || return
 }
 
+git_ci_last() {
+    local source_commit curr_commit max_backtrack
+    max_backtrack=50
+
+    { source_commit="$1" && shift ; } || source_commit='HEAD'
+
+    for i in $(seq 0 "$max_backtrack"); do
+        curr_commit="$(git rev-parse --verify --quiet "$source_commit~$i")" \
+            || break
+        if git_ci_get_test_results "$curr_commit" &>/dev/null; then
+            echo "$curr_commit"
+            return 0
+        fi
+    done
+
+    echo ''
+    warn "No test results found between '$curr_commit..$source_commit'."
+}
+
 git_ci_show() {
     local source_commit_one source_commit_two
     local tested_commit_one tested_commit_two
@@ -159,5 +178,6 @@ case "$git_ci_command" in
     commit)  git_ci_commit     ;;
     run)     git_ci_run   "$@" ;;
     show)    git_ci_show  "$@" ;;
+    last)    git_ci_last  "$@" ;;
     *)       fatal "Unrecognized command: $git_ci_command" ;;
 esac
