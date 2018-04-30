@@ -133,7 +133,7 @@ git_ci_test() {
 }
 
 git_ci_run() {
-    local curhead
+    local curhead exit_status
     local source_commit_one source_commit_two
 
     { source_commit_one="$1" && shift ; } || source_commit_one="HEAD"
@@ -143,12 +143,14 @@ git_ci_run() {
 
     curhead="$(git rev-parse --abbrev-ref HEAD)"
 
+    exit_status='0'
     for commit_id in $(git rev-list "$source_commit_one" "$source_commit_two"); do
         git checkout "$commit_id"
-        git ci test "$testset" || true
+        git ci test "$testset" || exit_status="$?"
     done
 
     git checkout "$curhead"
+    exit "$exit_status"
 }
 
 # Main
@@ -162,5 +164,5 @@ case "$git_ci_command" in
     commit)  git_ci_commit     ;;
     run)     git_ci_run   "$@" ;;
     show)    git_ci_show  "$@" ;;
-    *)       fatal "Unrecognized command: $git_ci_command..." ;;
+    *)       fatal "Unrecognized command: $git_ci_command" ;;
 esac
