@@ -8,10 +8,18 @@ testset="$1"        && shift
 
 ci_ref_prefix="refs/ci/$testset"
 
+notif() {
+    echo "== git ci: $@"
+}
+
+fatal() {
+    notif "$@" >&2
+    exit 1
+}
+
 clean_worktree_or_die() {
     if ! git diff --quiet; then
-        echo "Must run with a clean worktree!!!"
-        exit 1
+        fatal "Must run with a clean worktree!!!"
     fi
 }
 
@@ -49,9 +57,7 @@ git_ci_get_test_results() {
     source_commit="$1" && shift
     source_tree="$(git rev-parse "$source_commit^{tree}")"
     git rev-parse --verify --quiet "$ci_ref_prefix/$source_tree" \
-        || { echo "No test results for '$source_commit'." >&2
-             exit 1
-           }
+        || fatal "No test results for '$source_commit'."
 }
 
 git_ci_show() {
@@ -69,14 +75,13 @@ git_ci_show() {
     for i in $(seq 0 $max_backtrack); do
         tested_commit_two="$(git_ci_get_test_results "$source_commit_two^$i" 2>/dev/null)" || true
         if [[ "$tested_commit_two" != '' ]]; then
-            echo "index $source_commit_two^$i..$source_commit_one"
+            notif "index $source_commit_two^$i..$source_commit_one"
             git diff "$tested_commit_two" "$tested_commit_one"
             return
         fi
     done
 
-    echo "No test results found for '$source_commit_two^$max_backtrack..$source_commit_two'." >&2
-    exit 1
+    fatal "No test results found for '$source_commit_two^$max_backtrack..$source_commit_two'."
 }
 
 git_ci_cleanup() {
@@ -90,8 +95,17 @@ git_ci_test() {
 
     clean_worktree_or_die
 
+    # TODO: record exit codes and report back correct exit code?
+    # Perhaps with trailers in commit message? (git interpret-trailers)
+    # Otherwise, `git bisect` with `git ci test` will be broken.
+    ! git_ci_get_test_results 'HEAD' 2>/dev/null \
+        || { notif "Test results already exist for '$(git rev-parse HEAD)'."
+             notif "skipping..."
+             return 0
+           }
+
     test_command="$(git_ci_config --get "test.$testset.command")"
-    echo "== git ci: running test '$test_command'"
+    notif "running test '$test_command'"
     exit_status="0"
 
     git ci cleanup "$testset"
@@ -104,14 +118,20 @@ git_ci_test() {
 }
 
 git_ci_run() {
+    local curhead
+
     [[ "$#" != '0' ]] || set 'HEAD' '^HEAD^'
 
     clean_worktree_or_die
+
+    curhead="$(git rev-parse --abbrev-ref HEAD)"
 
     for commit_id in $(git rev-list "$@"); do
         git checkout "$commit_id"
         git ci test "$testset" || true
     done
+
+    git checkout "$curhead"
 }
 
 # git_ci_init() {
@@ -134,7 +154,7 @@ git_ci_start() {
     git rebase --interactive --exec "git ci run $testset || true" "$rebase_root"
 }
 
-echo "== git ci: $git_ci_command $testset $@"
+notif "$git_ci_command $testset $@"
 case "$git_ci_command" in
     cleanup) git_ci_cleanup    ;;
     test)    git_ci_test       ;;
@@ -143,5 +163,5 @@ case "$git_ci_command" in
     run)     git_ci_run   "$@" ;;
     show)    git_ci_show  "$@" ;;
     start)   git_ci_start "$@" ;;
-    *)       echo "Unrecognized git ci command: $git_ci_command..." && exit 1 ;;
+    *)       fatal "Unrecognized command: $git_ci_command..." ;;
 esac
