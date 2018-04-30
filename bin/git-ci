@@ -11,14 +11,9 @@ ci_ref_prefix="refs/ci/$testset"
 # Utilities
 # ---------
 
-notif() {
-    echo "== git ci: $@"
-}
-
-fatal() {
-    notif "$@" >&2
-    exit 1
-}
+notif() { echo "== git ci: $@" ; }
+warn()  { notif "$@" >&2       ; }
+fatal() { warn "$@" ; exit 1   ; }
 
 clean_worktree_or_die() {
     if ! git diff --quiet; then
