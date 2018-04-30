@@ -134,26 +134,6 @@ git_ci_run() {
     git checkout "$curhead"
 }
 
-# git_ci_init() {
-#     local init_ci="$1" && shift
-#     git branch --force "$ci_ref_prefix" "$init_ci"
-# }
-#
-# git_ci_reinit() {
-#     local last_common="$(git merge-base "$branch" "$ci_ref_prefix")"
-#     local next_ci_branch="$ci_ref_prefix"
-#     while [[ "$(git merge-base "$branch" "$next_ci_branch^")" == "$last_common" ]]; do
-#         next_ci_branch="$next_ci_branch^"
-#     done
-#     git ci init "$branch" "$testset" "$(git rev-parse $next_ci_branch)"
-# }
-
-git_ci_start() {
-    local rebase_root
-    rebase_root="$1" && shift
-    git rebase --interactive --exec "git ci run $testset || true" "$rebase_root"
-}
-
 notif "$git_ci_command $testset $@"
 case "$git_ci_command" in
     cleanup) git_ci_cleanup    ;;
@@ -162,6 +142,5 @@ case "$git_ci_command" in
     commit)  git_ci_commit     ;;
     run)     git_ci_run   "$@" ;;
     show)    git_ci_show  "$@" ;;
-    start)   git_ci_start "$@" ;;
     *)       fatal "Unrecognized command: $git_ci_command..." ;;
 esac
