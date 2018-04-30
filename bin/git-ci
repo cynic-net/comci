@@ -159,11 +159,12 @@ git_ci_run() {
     local source_commit_one source_commit_two
 
     { source_commit_one="$1" && shift ; } || source_commit_one="HEAD"
-    { source_commit_two="$1" && shift ; } || source_commit_two="$source_commit_one^"
+    { source_commit_two="$1" && shift ; } || source_commit_two="^$source_commit_one^"
 
     clean_worktree_or_die
 
     curhead="$(git rev-parse --abbrev-ref HEAD)"
+    trap "git checkout $curhead" INT TERM EXIT
 
     exit_status='0'
     for commit_id in $(git rev-list "$source_commit_one" "$source_commit_two"); do
@@ -171,7 +172,6 @@ git_ci_run() {
         git ci test "$testset" || exit_status="$?"
     done
 
-    git checkout "$curhead"
     exit "$exit_status"
 }
 
