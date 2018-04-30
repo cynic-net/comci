@@ -8,6 +8,9 @@ testset="$1"        && shift
 
 ci_ref_prefix="refs/ci/$testset"
 
+# Utilities
+# ---------
+
 notif() {
     echo "== git ci: $@"
 }
@@ -23,6 +26,9 @@ clean_worktree_or_die() {
     fi
 }
 
+# Configuration
+# -------------
+
 git_ci_config() {
     git config --file='.ci' "$@"
 }
@@ -30,6 +36,9 @@ git_ci_config() {
 git_ci_tracked_files() {
     git_ci_config --get "test.$testset.trackedFiles"
 }
+
+# Storing Results
+# ---------------
 
 git_ci_add() {
     git add --force $(git_ci_tracked_files)
@@ -51,6 +60,9 @@ git_ci_commit() {
 
     git update-ref "$ci_ref" "$tested_commit"
 }
+
+# Reading Results
+# ---------------
 
 git_ci_get_test_results() {
     local source_commit source_tree
@@ -83,6 +95,9 @@ git_ci_show() {
 
     fatal "No test results found for '$source_commit_two^$max_backtrack..$source_commit_two'."
 }
+
+# Running Tests
+# -------------
 
 git_ci_cleanup() {
     git reset
@@ -133,6 +148,9 @@ git_ci_run() {
 
     git checkout "$curhead"
 }
+
+# Main
+# ----
 
 notif "$git_ci_command $testset $@"
 case "$git_ci_command" in
