@@ -38,6 +38,7 @@ git_ci_tracked_files() {
 git_ci_add() {
     for file in $(git_ci_tracked_files); do
         [[ ! -f "$file" ]] || git add --force "$file"
+        [[ ! -d "$file" ]] || git add --force "$file"
     done
 }
 
