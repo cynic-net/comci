@@ -100,6 +100,26 @@ git_ci_list() {
     done
 }
 
+# Removing Results
+# ----------------
+
+git_ci_prune() {
+    local source_commit source_tree ci_ref
+
+    { source_commit="$1" && shift ; } || source_commit='HEAD'
+
+    git_ci_get "$source_commit" &>/dev/null \
+        || fatal "No test results for '$source_commit'."
+
+    source_tree="$(git rev-parse "$source_commit^{tree}")"
+    ci_ref="$ci_ref_prefix/$source_tree"
+
+    git update-ref -d "$ci_ref"
+}
+
+# Presenting Results
+# ------------------
+
 git_ci_diff() {
     local source_commit_one source_commit_two
     local tested_commit_one tested_commit_two
@@ -202,5 +222,6 @@ case "$git_ci_command" in
     show)    git_ci_show  "$@" ;;
     last)    git_ci_last  "$@" ;;
     list)    git_ci_list  "$@" ;;
+    prune)   git_ci_prune "$@" ;;
     *)       fatal "Unrecognized command: $git_ci_command" ;;
 esac
