@@ -16,6 +16,7 @@ warn()  { notif "$@" >&2       ; }
 fatal() { warn "$@" ; exit 1   ; }
 
 clean_worktree_or_die() {
+    git submodule update --init
     if ! git diff --quiet; then
         fatal "Must run with a clean worktree!!!"
     fi
