@@ -61,7 +61,7 @@ git_ci_commit() {
 # Reading Results
 # ---------------
 
-git_ci_get_test_results() {
+git_ci_get() {
     local source_commit source_tree
     source_commit="$1" && shift
     source_tree="$(git rev-parse "$source_commit^{tree}")"
@@ -78,7 +78,7 @@ git_ci_last() {
     for i in $(seq 0 "$max_backtrack"); do
         curr_commit="$(git rev-parse --verify --quiet "$source_commit~$i")" \
             || break
-        if git_ci_get_test_results "$curr_commit" &>/dev/null; then
+        if git_ci_get "$curr_commit" &>/dev/null; then
             echo "$curr_commit"
             return 0
         fi
@@ -95,11 +95,11 @@ git_ci_diff() {
     source_commit_one="$1" && shift
     source_commit_two="$1" && shift
 
-    tested_commit_two="$(git_ci_get_test_results "$source_commit_two")"
+    tested_commit_two="$(git_ci_get "$source_commit_two")"
     if [[ "$source_commit_one" == '' ]]; then
         tested_commit_one="$source_commit_two"
     else
-        tested_commit_one="$(git_ci_get_test_results "$source_commit_one")"
+        tested_commit_one="$(git_ci_get "$source_commit_one")"
     fi
 
     git diff "$tested_commit_one" "$tested_commit_two" "$@"
@@ -135,7 +135,7 @@ git_ci_test() {
     # TODO: record exit codes and report back correct exit code?
     # Perhaps with trailers in commit message? (git interpret-trailers)
     # Otherwise, `git bisect` with `git ci test` will be broken.
-    ! git_ci_get_test_results 'HEAD' \
+    ! git_ci_get 'HEAD' \
         || { notif "Test results already exist for '$(git rev-parse HEAD)'."
              notif "skipping..."
              return 0
@@ -184,6 +184,7 @@ case "$git_ci_command" in
     test)    git_ci_test       ;;
     add)     git_ci_add        ;;
     commit)  git_ci_commit     ;;
+    get)     git_ci_get   "$@" ;;
     run)     git_ci_run   "$@" ;;
     diff)    git_ci_diff  "$@" ;;
     show)    git_ci_show  "$@" ;;
