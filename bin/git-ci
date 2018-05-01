@@ -63,7 +63,7 @@ git_ci_commit() {
 
 git_ci_get() {
     local source_commit source_tree
-    source_commit="$1" && shift
+    { source_commit="$1" && shift ; } || source_commit='HEAD'
     source_tree="$(git rev-parse "$source_commit^{tree}")"
     git rev-parse --verify --quiet "$ci_ref_prefix/$source_tree" \
         || return
