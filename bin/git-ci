@@ -152,6 +152,33 @@ git_ci_show() {
     git_ci_diff "$source_commit_two" "$source_commit_one" "$@"
 }
 
+# Generate a history for use with git-log or git-show. Outputs the commit id
+# of the HEAD, but does not create a ref.
+
+git_ci_gen_hist() {
+    local source_commit
+    local source_ancestor tested_ancestor prev_tested_ancestor
+
+    { source_commit="$1" \
+        && git rev-parse --verify --quiet "$source_commit" &>/dev/null \
+        && shift
+    } || source_commit='HEAD'
+
+    while read source_ancestor; do
+        local parent_args=()
+        [[ $generated_commit == "" ]] ||
+            parent_args+=( '-p' "$generated_commit" )
+        parent_args+=( '-p' "$source_ancestor" )
+
+        tested_ancestor="$(git_ci_get "$source_ancestor")" || continue
+        tested_ancestor_tree="$(git rev-parse "$tested_ancestor^{tree}")"
+
+        generated_commit="$(git commit-tree "${parent_args[@]}" \
+            "$tested_ancestor_tree" -m "ci: $testset: $source_commit" )"
+    done < <(git rev-list --reverse "$source_commit")
+    echo "$generated_commit"
+}
+
 git_ci_log() {
     local source_commit tested_commit tested_commits
 
@@ -231,17 +258,18 @@ git_ci_run() {
 
 notif "$git_ci_command $testset $@"
 case "$git_ci_command" in
-    cleanup) git_ci_cleanup    ;;
-    test)    git_ci_test       ;;
-    add)     git_ci_add        ;;
-    commit)  git_ci_commit     ;;
-    get)     git_ci_get   "$@" ;;
-    run)     git_ci_run   "$@" ;;
-    diff)    git_ci_diff  "$@" ;;
-    show)    git_ci_show  "$@" ;;
-    last)    git_ci_last  "$@" ;;
-    list)    git_ci_list  "$@" ;;
-    prune)   git_ci_prune "$@" ;;
-    log)     git_ci_log   "$@" ;;
+    cleanup) git_ci_cleanup       ;;
+    test)    git_ci_test          ;;
+    add)     git_ci_add           ;;
+    commit)  git_ci_commit        ;;
+    get)     git_ci_get      "$@" ;;
+    run)     git_ci_run      "$@" ;;
+    diff)    git_ci_diff     "$@" ;;
+    show)    git_ci_show     "$@" ;;
+    last)    git_ci_last     "$@" ;;
+    hist)    git_ci_gen_hist "$@" ;;
+    list)    git_ci_list     "$@" ;;
+    prune)   git_ci_prune    "$@" ;;
+    log)     git_ci_log      "$@" ;;
     *)       fatal "Unrecognized command: $git_ci_command" ;;
 esac
