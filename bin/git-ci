@@ -152,6 +152,23 @@ git_ci_show() {
     git_ci_diff "$source_commit_two" "$source_commit_one" "$@"
 }
 
+git_ci_log() {
+    local source_commit tested_commit tested_commits
+
+    { source_commit="$1" \
+        && git rev-parse --verify --quiet "$source_commit" &>/dev/null \
+        && shift
+    } || source_commit='HEAD'
+
+    tested_commits=()
+    for commit in $(git_ci_list "$source_commit"); do
+        tested_commit="$(git_ci_get "$commit")"
+        tested_commits+=("$tested_commit" "^$tested_commit^")
+    done
+
+    git log --reverse "${tested_commits[@]}" "$@"
+}
+
 # Running Tests
 # -------------
 
@@ -225,5 +242,6 @@ case "$git_ci_command" in
     last)    git_ci_last  "$@" ;;
     list)    git_ci_list  "$@" ;;
     prune)   git_ci_prune "$@" ;;
+    log)     git_ci_log   "$@" ;;
     *)       fatal "Unrecognized command: $git_ci_command" ;;
 esac
