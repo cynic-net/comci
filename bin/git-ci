@@ -156,8 +156,9 @@ git_ci_show() {
 # of the HEAD, but does not create a ref.
 
 git_ci_gen_hist() {
-    local source_commit
-    local source_ancestor tested_ancestor prev_tested_ancestor
+    local source_commit source_ancestor source_message
+    local tested_ancestor tested_ancestor_tree
+    local generated_commit
 
     { source_commit="$1" \
         && git rev-parse --verify --quiet "$source_commit" &>/dev/null \
@@ -166,16 +167,17 @@ git_ci_gen_hist() {
 
     while read source_ancestor; do
         local parent_args=()
-        [[ $generated_commit == "" ]] ||
+        [[ "$generated_commit" == "" ]] ||
             parent_args+=( '-p' "$generated_commit" )
         parent_args+=( '-p' "$source_ancestor" )
 
-        tested_ancestor="$(git_ci_get "$source_ancestor")" || continue
+        tested_ancestor="$(git_ci_get "$source_ancestor")"
         tested_ancestor_tree="$(git rev-parse "$tested_ancestor^{tree}")"
 
+        source_message="$(git log -n1 --format=%s "$source_ancestor")"
         generated_commit="$(git commit-tree "${parent_args[@]}" \
-            "$tested_ancestor_tree" -m "ci: $testset: $source_commit" )"
-    done < <(git rev-list --reverse "$source_commit")
+            "$tested_ancestor_tree" -m "ci: $testset: $source_message")"
+    done < <(git_ci_list "$source_commit" | tac)
     echo "$generated_commit"
 }
 
