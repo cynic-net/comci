@@ -220,7 +220,7 @@ git_ci_test() {
     return "$exit_status"
 }
 
-git_ci_run() {
+git_ci_run_linear() {
     local curhead exit_status
     local source_commit_one source_commit_two
 
@@ -246,21 +246,21 @@ git_ci_run() {
 
 notif "$git_ci_command $testset $@"
 case "$git_ci_command" in
-    cleanup)  git_ci_cleanup       ;;
-    test)     git_ci_test          ;;
-    add)      git_ci_add           ;;
-    commit)   git_ci_commit        ;;
-    get)      git_ci_get      "$@" ;;
-    run)      git_ci_run      "$@" ;;
-    diff)     git_ci_diff     "$@" ;;
-    show)     git_ci_show     "$@" ;;
-    last)     git_ci_last     "$@" ;;
-    gen-hist) git_ci_gen_hist "$@" ;;
-    list)     git_ci_list     "$@" ;;
-    prune)    git_ci_prune    "$@" ;;
-    log)      git_ci_log      "$@" ;;
-    *)        expanded_alias=($(git config --get "alias.$git_ci_command")) \
-                 || fatal "Unrecognized command: $git_ci_command"
-              eval git ci "${expanded_alias[0]}" "$testset" "${expanded_alias[@]:1}" "$@"
-              ;;
+    cleanup)    git_ci_cleanup         ;;
+    test)       git_ci_test            ;;
+    add)        git_ci_add             ;;
+    commit)     git_ci_commit          ;;
+    get)        git_ci_get        "$@" ;;
+    run-linear) git_ci_run_linear "$@" ;;
+    diff)       git_ci_diff       "$@" ;;
+    show)       git_ci_show       "$@" ;;
+    last)       git_ci_last       "$@" ;;
+    gen-hist)   git_ci_gen_hist   "$@" ;;
+    list)       git_ci_list       "$@" ;;
+    prune)      git_ci_prune      "$@" ;;
+    log)        git_ci_log        "$@" ;;
+    *)          expanded_alias=($(git config --get "alias.$git_ci_command")) \
+                   || fatal "Unrecognized command: $git_ci_command"
+                eval git ci "${expanded_alias[0]}" "$testset" "${expanded_alias[@]:1}" "$@"
+                ;;
 esac
