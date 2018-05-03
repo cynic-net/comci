@@ -11,9 +11,8 @@ ci_ref_prefix="refs/ci/$testset"
 # Utilities
 # ---------
 
-notif() { echo "== git ci: $@" ; }
-warn()  { notif "$@" >&2       ; }
-fatal() { warn "$@" ; exit 1   ; }
+notif() { echo "== git ci ($testset): $@" >&2 ; }
+fatal() { notif "$@" ; exit 1                 ; }
 
 clean_worktree_or_die() {
     git submodule update --init
@@ -89,7 +88,7 @@ git_ci_last() {
     done
 
     echo ''
-    warn "No test results found between '$curr_commit..$source_commit'."
+    notif "No test results found between '$curr_commit..$source_commit'."
 }
 
 git_ci_list() {
