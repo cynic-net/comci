@@ -252,6 +252,32 @@ git_ci_run_linear() {
     exit "$exit_status"
 }
 
+git_ci_run_bisect() {
+    local source_commit_one source_commit_two
+    local rev_list next_rev_id
+
+    source_commit_one="$1" && shift
+    { source_commit_two="$1" && shift ; } || source_commit_two="HEAD"
+
+    [[ "$source_commit_one" != "$source_commit_two" ]] || return 0
+
+    exit_status="$?"
+
+    git_ci_run "$source_commit_one" || exit_status="$?"
+    git_ci_run "$source_commit_two" || exit_status="$?"
+
+    if ! git_ci_diff "$source_commit_one" "$source_commit_two" --quiet -- $(git_ci_tracked_files); then
+        rev_list=($(git rev-list "$source_commit_one..$source_commit_two"))
+        next_rev_id="$((${#rev_list[@]} / 2))"
+        [[ "$next_rev_id" -gt '0' ]] || return "$exit_status"
+        next_rev="${rev_list[$next_rev_id]}"
+        git_ci_run_bisect "$source_commit_one" "$next_rev" || exit_status="$?"
+        git_ci_run_bisect "$next_rev" "$source_commit_two" || exit_status="$?"
+    fi
+
+    return "$exit_status"
+}
+
 # Main
 # ----
 
@@ -264,6 +290,7 @@ case "$git_ci_command" in
     get)        git_ci_get        "$@" ;;
     run)        git_ci_run        "$@" ;;
     run-linear) git_ci_run_linear "$@" ;;
+    run-bisect) git_ci_run_bisect "$@" ;;
     diff)       git_ci_diff       "$@" ;;
     show)       git_ci_show       "$@" ;;
     last)       git_ci_last       "$@" ;;
