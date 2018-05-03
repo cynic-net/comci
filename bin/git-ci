@@ -115,7 +115,19 @@ git_ci_prune() {
     ci_ref="$(git_ci_get "$source_commit")" \
         || fatal "No test results for '$source_commit'."
 
+    notif "Pruning test results for: '$source_commit'"
+
     git update-ref -d "$ci_ref"
+}
+
+git_ci_prune_all() {
+    local source_commit
+
+    { source_commit="$1" && shift ; } || source_commit='HEAD'
+
+    for source_commit in $(git_ci_list "$source_commit"); do
+        git_ci_prune "$source_commit"
+    done
 }
 
 # Presenting Results
@@ -297,6 +309,7 @@ case "$git_ci_command" in
     gen-hist)   git_ci_gen_hist   "$@" ;;
     list)       git_ci_list       "$@" ;;
     prune)      git_ci_prune      "$@" ;;
+    prune-all)  git_ci_prune_all  "$@" ;;
     log)        git_ci_log        "$@" ;;
     *)          expanded_alias=($(git config --get "alias.$git_ci_command")) \
                    || fatal "Unrecognized command: $git_ci_command"
