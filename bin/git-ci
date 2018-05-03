@@ -246,18 +246,18 @@ git_ci_run() {
 
 notif "$git_ci_command $testset $@"
 case "$git_ci_command" in
-    cleanup) git_ci_cleanup       ;;
-    test)    git_ci_test          ;;
-    add)     git_ci_add           ;;
-    commit)  git_ci_commit        ;;
-    get)     git_ci_get      "$@" ;;
-    run)     git_ci_run      "$@" ;;
-    diff)    git_ci_diff     "$@" ;;
-    show)    git_ci_show     "$@" ;;
-    last)    git_ci_last     "$@" ;;
-    hist)    git_ci_gen_hist "$@" ;;
-    list)    git_ci_list     "$@" ;;
-    prune)   git_ci_prune    "$@" ;;
-    log)     git_ci_log      "$@" ;;
-    *)       fatal "Unrecognized command: $git_ci_command" ;;
+    cleanup)  git_ci_cleanup       ;;
+    test)     git_ci_test          ;;
+    add)      git_ci_add           ;;
+    commit)   git_ci_commit        ;;
+    get)      git_ci_get      "$@" ;;
+    run)      git_ci_run      "$@" ;;
+    diff)     git_ci_diff     "$@" ;;
+    show)     git_ci_show     "$@" ;;
+    last)     git_ci_last     "$@" ;;
+    gen-hist) git_ci_gen_hist "$@" ;;
+    list)     git_ci_list     "$@" ;;
+    prune)    git_ci_prune    "$@" ;;
+    log)      git_ci_log      "$@" ;;
+    *)        fatal "Unrecognized command: $git_ci_command" ;;
 esac
