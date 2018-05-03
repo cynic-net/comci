@@ -196,26 +196,42 @@ git_ci_cleanup() {
 git_ci_test() {
     local test_command
 
+    test_command="$(git_ci_config --get "test.$testset.command")"
+    notif "running test '$test_command'"
+
+    bash -c "$test_command"
+}
+
+git_ci_run() {
+    local source_commit curhead exit_status
+
+    source_commit="$1" && shift
+
     clean_worktree_or_die
 
     # TODO: record exit codes and report back correct exit code?
     # Perhaps with trailers in commit message? (git interpret-trailers)
     # Otherwise, `git bisect` with `git ci test` will be broken.
-    ! git_ci_get 'HEAD' \
-        || { notif "Test results already exist for '$(git rev-parse HEAD)'."
-             notif "skipping..."
+    ! git_ci_get "$source_commit" &>/dev/null \
+        || { notif "Test results already exist for '$source_commit'."
              return 0
            }
 
-    test_command="$(git_ci_config --get "test.$testset.command")"
-    notif "running test '$test_command'"
-    exit_status="0"
+    notif "Running tests on commit: '$source_commit'"
 
-    git ci cleanup "$testset"
-    bash -c "$test_command" || exit_status="$?"
-    git ci add     "$testset"
-    git ci commit  "$testset"
-    git ci cleanup "$testset"
+    curhead="$(git rev-parse --abbrev-ref HEAD)"
+    trap "git checkout $curhead ; exit 1" INT TERM EXIT
+
+    git checkout "$source_commit"
+
+    exit_status='0'
+    git_ci_cleanup
+    git_ci_test     || exit_status="$?"
+    git_ci_add
+    git_ci_commit
+    git_ci_cleanup
+
+    git checkout "$curhead"
 
     return "$exit_status"
 }
@@ -251,6 +267,7 @@ case "$git_ci_command" in
     add)        git_ci_add             ;;
     commit)     git_ci_commit          ;;
     get)        git_ci_get        "$@" ;;
+    run)        git_ci_run        "$@" ;;
     run-linear) git_ci_run_linear "$@" ;;
     diff)       git_ci_diff       "$@" ;;
     show)       git_ci_show       "$@" ;;
