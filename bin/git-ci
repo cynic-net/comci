@@ -181,20 +181,7 @@ git_ci_gen_hist() {
 }
 
 git_ci_log() {
-    local source_commit tested_commit tested_commits
-
-    { source_commit="$1" \
-        && git rev-parse --verify --quiet "$source_commit" &>/dev/null \
-        && shift
-    } || source_commit='HEAD'
-
-    tested_commits=()
-    for commit in $(git_ci_list "$source_commit"); do
-        tested_commit="$(git_ci_get "$commit")"
-        tested_commits+=("$tested_commit" "^$tested_commit^")
-    done
-
-    git log --reverse "${tested_commits[@]}" "$@"
+    git log -m --first-parent "$@"
 }
 
 # Running Tests
