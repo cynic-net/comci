@@ -259,5 +259,8 @@ case "$git_ci_command" in
     list)     git_ci_list     "$@" ;;
     prune)    git_ci_prune    "$@" ;;
     log)      git_ci_log      "$@" ;;
-    *)        fatal "Unrecognized command: $git_ci_command" ;;
+    *)        expanded_alias=($(git config --get "alias.$git_ci_command")) \
+                 || fatal "Unrecognized command: $git_ci_command"
+              eval git ci "${expanded_alias[0]}" "$testset" "${expanded_alias[@]:1}" "$@"
+              ;;
 esac
