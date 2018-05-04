@@ -79,16 +79,18 @@ git_ci_last() {
     { source_commit="$1" && shift ; } || source_commit='HEAD'
 
     for i in $(seq 0 "$max_backtrack"); do
-        curr_commit="$(git rev-parse --verify --quiet "$source_commit~$i")" \
-            || break
+        curr_commit="$source_commit~$i"
+        git rev-parse --verify --quiet "$curr_commit" &>/dev/null \
+            || { notif "Not a commit: '$curr_commit'"
+                 break
+               }
         if git_ci_get "$curr_commit" &>/dev/null; then
             echo "$curr_commit"
             return 0
         fi
     done
 
-    echo ''
-    notif "No test results found between '$curr_commit..$source_commit'."
+    notif "No test results found between: $curr_commit..$source_commit"
 }
 
 git_ci_list() {
