@@ -108,26 +108,28 @@ git_ci_list() {
 # Removing Results
 # ----------------
 
-git_ci_prune() {
+git_ci_clear() {
     local source_commit source_tree ci_ref
 
     { source_commit="$1" && shift ; } || source_commit='HEAD'
 
     ci_ref="$(git_ci_get "$source_commit")" \
-        || fatal "No test results for '$source_commit'."
+        || { notif "No test results for: $source_commit"
+             return 1
+           }
 
-    notif "Pruning test results for: '$source_commit'"
+    notif "Pruning test results for: $source_commit"
 
     git update-ref -d "$ci_ref"
 }
 
 git_ci_prune_all() {
-    local source_commit
+    local source_commit curr_commit
 
     { source_commit="$1" && shift ; } || source_commit='HEAD'
 
-    for source_commit in $(git_ci_list "$source_commit"); do
-        git_ci_prune "$source_commit"
+    for curr_commit in $(git_ci_list "$source_commit"); do
+        git_ci_clear "$curr_commit" || true
     done
 }
 
@@ -309,8 +311,8 @@ case "$git_ci_command" in
     last)       git_ci_last       "$@" ;;
     gen-hist)   git_ci_gen_hist   "$@" ;;
     list)       git_ci_list       "$@" ;;
-    prune)      git_ci_prune      "$@" ;;
-    prune-all)  git_ci_prune_all  "$@" ;;
+    clear)      git_ci_clear      "$@" ;;
+    clear-all)  git_ci_prune_all  "$@" ;;
     log)        git_ci_log        "$@" ;;
     *)          expanded_alias=($(git config --get "alias.$git_ci_command")) \
                    || fatal "Unrecognized command: $git_ci_command"
