@@ -290,6 +290,27 @@ git_ci_run_bisect() {
     return "$exit_status"
 }
 
+git_ci_run_sparse() {
+    local source_commit_one source_commit_two
+    local mid_rev exit_status
+
+    source_commit_one="$1" && shift
+    { source_commit_two="$1" && shift ; } || source_commit_two="HEAD"
+
+    exit_status='0'
+
+    git_ci_run "$source_commit_one" || exit_status="$?"
+    git_ci_run "$source_commit_two" || exit_status="$?"
+
+    mid_rev="$(git_ci_last "$source_commit_two^")"
+    if [[ "$mid_rev" == '' ]] || [[ "$(git rev-parse "$mid_rev")" == "$(git rev-parse "$source_commit_one")" ]]; then
+        git_ci_run_bisect "$source_commit_one" "$source_commit_two" || exit_status="$?"
+    else
+        git_ci_run_sparse "$source_commit_one" "$mid_rev" || exit_status="$?"
+        git_ci_run_sparse "$mid_rev" "$source_commit_one" || exit_status="$?"
+    fi
+}
+
 # Main
 # ----
 
@@ -303,6 +324,7 @@ case "$git_ci_command" in
     run)        git_ci_run        "$@" ;;
     run-linear) git_ci_run_linear "$@" ;;
     run-bisect) git_ci_run_bisect "$@" ;;
+    run-sparse) git_ci_run_sparse "$@" ;;
     diff)       git_ci_diff       "$@" ;;
     show)       git_ci_show       "$@" ;;
     last)       git_ci_last       "$@" ;;
