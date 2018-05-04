@@ -212,8 +212,6 @@ git_ci_test() {
     local test_command
 
     test_command="$(git_ci_config --get "test.$testset.command")"
-    notif "running test '$test_command'"
-
     bash -c "$test_command"
 }
 
@@ -228,11 +226,11 @@ git_ci_run() {
     # Perhaps with trailers in commit message? (git interpret-trailers)
     # Otherwise, `git bisect` with `git ci test` will be broken.
     ! git_ci_get "$source_commit" &>/dev/null \
-        || { notif "Test results already exist for '$source_commit'."
+        || { notif "Test results already exist for: $source_commit"
              return 0
            }
 
-    notif "Running tests on commit: '$source_commit'"
+    notif "Running tests on commit: $source_commit"
 
     curhead="$(git rev-parse --abbrev-ref HEAD)"
     trap "git checkout $curhead ; exit 1" INT TERM EXIT
