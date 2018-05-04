@@ -100,7 +100,7 @@ git_ci_list() {
 
     source_commit="$(git_ci_last "$source_commit" 2>/dev/null)"
     while [[ "$source_commit" != '' ]]; do
-        echo "$source_commit"
+        echo "$(git rev-parse source_commit)"
         source_commit="$(git_ci_last "$source_commit^" 2>/dev/null)"
     done
 }
