@@ -6,6 +6,7 @@ set -e
 git_ci_command="$1" && shift
 testset="$1"        && shift
 
+ci_config=".ci"
 ci_ref_prefix="refs/ci/$testset"
 
 # Utilities
@@ -25,11 +26,12 @@ clean_worktree_or_die() {
 # -------------
 
 git_ci_config() {
-    git config --file='.ci' "$@"
+    git config --file="$ci_config" "$@"
 }
 
 git_ci_tracked_files() {
-    git_ci_config --get "test.$testset.trackedFiles"
+    git_ci_config --get "test.$testset.trackedFiles" \
+        || fatal "Entry not found: test.$testset.trackedFiles"
 }
 
 # Storing Results
@@ -313,6 +315,9 @@ git_ci_run_sparse() {
 
 # Main
 # ----
+
+git_ci_config --get-regexp "test.$testset" &>/dev/null \
+    || fatal "Entry not found in '$ci_config': test.$testset"
 
 notif "$git_ci_command $testset $@"
 case "$git_ci_command" in
