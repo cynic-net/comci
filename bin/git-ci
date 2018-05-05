@@ -197,8 +197,17 @@ git_ci_gen_hist() {
     echo "$generated_commit"
 }
 
-git_ci_log() {
-    git log -m --first-parent "$@"
+git_ci_hist() {
+    local source_commit
+
+    { source_commit="$1" \
+        && git rev-parse --verify --quiet "$source_commit" &>/dev/null \
+        && shift
+    } || source_commit='HEAD'
+
+    git log --abbrev-commit --decorate --date=relative --graph --topo-order \
+            --format=format:'%C(bold green)%h%C(reset) - %C(dim blue)%s%C(reset) - %C(blue)%an%C(reset)%C(bold yellow)%d%C(reset)' \
+            "$(git_ci_gen_hist "$source_commit")" "$@"
 }
 
 # Running Tests
@@ -337,7 +346,9 @@ case "$git_ci_command" in
     list)       git_ci_list       "$@" ;;
     clear)      git_ci_clear      "$@" ;;
     clear-all)  git_ci_clear_all  "$@" ;;
-    log)        git_ci_log        "$@" ;;
+    hist)       git_ci_hist       "$@" ;;
+    hists)      git_ci_hist -m --first-parent --stat  "$@" ;;
+    histp)      git_ci_hist -m --first-parent --patch "$@" ;;
     *)          expanded_alias=($(git config --get "alias.$git_ci_command")) \
                    || fatal "Unrecognized command: $git_ci_command"
                 eval git ci "${expanded_alias[0]}" "$testset" "${expanded_alias[@]:1}" "$@"
