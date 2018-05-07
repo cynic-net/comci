@@ -22,6 +22,18 @@ clean_worktree_or_die() {
     fi
 }
 
+commit_comes_before_or_die() {
+    local source_commit_one source_commit_two
+    local mbase
+
+    source_commit_one="$1" && shift
+    source_commit_two="$1" && shift
+
+    { mbase="$(git merge-base "$source_commit_one" "$source_commit_two")" \
+        && [[ "$mbase" == "$(git rev-parse "$source_commit_one")" ]]
+    } || fatal "Commit order does not hold: $source_commit_one <= $source_commit_two"
+}
+
 # Configuration
 # -------------
 
@@ -267,6 +279,7 @@ git_ci_run_linear() {
     # source_commit_one^..source_commit_two
     source_commit_one="$1" && shift
     { source_commit_two="$1" && shift ; } || source_commit_two="HEAD"
+    commit_comes_before_or_die "$source_commit_one" "$source_commit_two"
 
     exit_status='0'
     for commit_id in $(git rev-list "$source_commit_one^..$source_commit_two"); do
@@ -282,6 +295,7 @@ git_ci_run_bisect() {
 
     source_commit_one="$1" && shift
     { source_commit_two="$1" && shift ; } || source_commit_two="HEAD"
+    commit_comes_before_or_die "$source_commit_one" "$source_commit_two"
 
     exit_status='0'
 
@@ -308,6 +322,7 @@ git_ci_run_sparse() {
 
     source_commit_one="$1" && shift
     { source_commit_two="$1" && shift ; } || source_commit_two="HEAD"
+    commit_comes_before_or_die "$source_commit_one" "$source_commit_two"
 
     exit_status='0'
 
