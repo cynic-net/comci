@@ -247,7 +247,7 @@ git_ci_run() {
 
     # TODO: record exit codes and report back correct exit code?
     # Perhaps with trailers in commit message? (git interpret-trailers)
-    # Otherwise, `git bisect` with `git ci test` will be broken.
+    # Otherwise, `git ci run-bisect/sparse` may act strange.
     ! git_ci_get "$source_commit" &>/dev/null \
         || { notif "Test results already exist for: $source_commit"
              return 0
