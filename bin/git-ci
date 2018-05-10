@@ -241,7 +241,7 @@ git_ci_test() {
 git_ci_run() {
     local source_commit curhead exit_status
 
-    source_commit="$1" && shift
+    { source_commit="$1" && shift ; } || source_commit='HEAD'
 
     clean_worktree_or_die
 
