@@ -271,14 +271,29 @@ git_ci_run() {
     return "$exit_status"
 }
 
+# Over Spans of Commits
+# ---------------------
+
+set_default_commit_span() {
+    { source_commit_one="$1" \
+        && git rev-parse --verify --quiet "$source_commit_one" &>/dev/null \
+        && shift
+    } || source_commit_one="$(git_ci_last)"
+    [[ "$source_commit_one" != '' ]] \
+        || fatal "No starting commit supplied and no last tested commit found."
+
+    { source_commit_two="$1" \
+        && git rev-parse --verify --quiet "$source_commit_two" &>/dev/null \
+        && shift
+    } || source_commit_two="HEAD"
+    commit_comes_before_or_die "$source_commit_one" "$source_commit_two"
+}
+
 git_ci_run_linear() {
     local curhead exit_status
     local source_commit_one source_commit_two
 
-    # source_commit_one^..source_commit_two
-    source_commit_one="$1" && shift
-    { source_commit_two="$1" && shift ; } || source_commit_two="HEAD"
-    commit_comes_before_or_die "$source_commit_one" "$source_commit_two"
+    set_default_commit_span "$@"
 
     exit_status='0'
     for commit_id in $(git rev-list "$source_commit_one^..$source_commit_two"); do
@@ -292,9 +307,7 @@ git_ci_run_bisect() {
     local source_commit_one source_commit_two
     local mid_rev exit_status
 
-    source_commit_one="$1" && shift
-    { source_commit_two="$1" && shift ; } || source_commit_two="HEAD"
-    commit_comes_before_or_die "$source_commit_one" "$source_commit_two"
+    set_default_commit_span "$@"
 
     exit_status='0'
 
@@ -319,9 +332,7 @@ git_ci_run_sparse() {
     local bisect_commit_one bisect_commit_two
     local exit_status
 
-    source_commit_one="$1" && shift
-    { source_commit_two="$1" && shift ; } || source_commit_two="HEAD"
-    commit_comes_before_or_die "$source_commit_one" "$source_commit_two"
+    set_default_commit_span "$@"
 
     exit_status='0'
 
