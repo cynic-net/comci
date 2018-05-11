@@ -34,6 +34,13 @@ commit_comes_before_or_die() {
     } || fatal "Commit order does not hold: $source_commit_one <= $source_commit_two"
 }
 
+commit_exists() {
+    local source_commit
+
+    source_commit="$1" && shift
+    git rev-parse --verify --quiet "$source_commit" &>/dev/null
+}
+
 # Configuration
 # -------------
 
@@ -81,8 +88,7 @@ git_ci_get() {
     { source_commit="$1" && shift ; } || source_commit='HEAD'
     source_tree="$(git rev-parse "$source_commit^{tree}")"
     ci_ref="$ci_ref_prefix/$source_tree"
-    git rev-parse --verify --quiet "$ci_ref" &>/dev/null \
-        || return
+    commit_exists "$ci_ref" || return
     echo "$ci_ref"
 }
 
@@ -94,7 +100,7 @@ git_ci_last() {
 
     for i in $(seq 0 "$max_backtrack"); do
         curr_commit="$source_commit~$i"
-        git rev-parse --verify --quiet "$curr_commit" &>/dev/null \
+        commit_exists "$curr_commit" \
             || { notif "Not a commit: '$curr_commit'"
                  break
                }
@@ -172,7 +178,7 @@ git_ci_show() {
     local tested_commit_one tested_commit_two
 
     { source_commit_one="$1" \
-        && git rev-parse --verify --quiet "$source_commit_one" &>/dev/null \
+        && commit_exists "$source_commit_one" \
         && shift
     } || source_commit_one='HEAD'
     source_commit_two="$(git_ci_last "$source_commit_one^")"
@@ -189,7 +195,7 @@ git_ci_gen_hist() {
     local generated_commit
 
     { source_commit="$1" \
-        && git rev-parse --verify --quiet "$source_commit" &>/dev/null \
+        && commit_exists "$source_commit" \
         && shift
     } || source_commit='HEAD'
 
@@ -213,7 +219,7 @@ git_ci_hist() {
     local source_commit
 
     { source_commit="$1" \
-        && git rev-parse --verify --quiet "$source_commit" &>/dev/null \
+        && commit_exists "$source_commit" \
         && shift
     } || source_commit='HEAD'
 
@@ -276,14 +282,14 @@ git_ci_run() {
 
 set_default_commit_span() {
     { source_commit_one="$1" \
-        && git rev-parse --verify --quiet "$source_commit_one" &>/dev/null \
+        && commit_exists "$source_commit_one" \
         && shift
     } || source_commit_one="$(git_ci_last)"
     [[ "$source_commit_one" != '' ]] \
         || fatal "No starting commit supplied and no last tested commit found."
 
     { source_commit_two="$1" \
-        && git rev-parse --verify --quiet "$source_commit_two" &>/dev/null \
+        && commit_exists "$source_commit_two" \
         && shift
     } || source_commit_two="HEAD"
     commit_comes_before_or_die "$source_commit_one" "$source_commit_two"
