@@ -275,7 +275,7 @@ git_ci_run() {
 # Over Spans of Commits
 # ---------------------
 
-set_default_commit_span() {
+set_source_commit_one_two() {
     { source_commit_one="$1" \
         && commit_exists "$source_commit_one" \
         && shift
@@ -294,7 +294,7 @@ git_ci_run_linear() {
     local curhead exit_status
     local source_commit_one source_commit_two
 
-    set_default_commit_span "$@"
+    set_source_commit_one_two "$@"
 
     exit_status='0'
     for commit_id in $(git rev-list "$source_commit_one^..$source_commit_two"); do
@@ -308,7 +308,7 @@ git_ci_run_bisect() {
     local source_commit_one source_commit_two
     local mid_rev exit_status
 
-    set_default_commit_span "$@"
+    set_source_commit_one_two "$@"
 
     exit_status='0'
 
@@ -333,7 +333,7 @@ git_ci_run_sparse() {
     local bisect_commit_one bisect_commit_two
     local exit_status
 
-    set_default_commit_span "$@"
+    set_source_commit_one_two "$@"
 
     exit_status='0'
 
