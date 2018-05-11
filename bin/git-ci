@@ -83,9 +83,22 @@ git_ci_commit() {
 # Reading Results
 # ---------------
 
+set_source_commit() {
+    local shift_count
+
+    shift_count='0'
+    { source_commit="$1" \
+        && commit_exists "$source_commit" \
+        && shift_count='1'
+    } || source_commit='HEAD'
+
+    return "$shift_count"
+}
+
 git_ci_get() {
     local source_commit source_tree ci_ref
-    { source_commit="$1" && shift ; } || source_commit='HEAD'
+    set_source_commit "$@" || shift "$?"
+
     source_tree="$(git rev-parse "$source_commit^{tree}")"
     ci_ref="$ci_ref_prefix/$source_tree"
     commit_exists "$ci_ref" || return
@@ -95,8 +108,7 @@ git_ci_get() {
 git_ci_last() {
     local source_commit curr_commit max_backtrack
     max_backtrack=50
-
-    { source_commit="$1" && shift ; } || source_commit='HEAD'
+    set_source_commit "$@" || shift "$?"
 
     for i in $(seq 0 "$max_backtrack"); do
         curr_commit="$source_commit~$i"
@@ -115,8 +127,7 @@ git_ci_last() {
 
 git_ci_list() {
     local source_commit
-
-    { source_commit="$1" && shift ; } || source_commit='HEAD'
+    set_source_commit "$@" || shift "$?"
 
     source_commit="$(git_ci_last "$source_commit" 2>/dev/null)"
     while [[ "$source_commit" != '' ]]; do
@@ -130,23 +141,19 @@ git_ci_list() {
 
 git_ci_clear() {
     local source_commit source_tree ci_ref
-
-    { source_commit="$1" && shift ; } || source_commit='HEAD'
+    set_source_commit "$@" || shift "$?"
 
     ci_ref="$(git_ci_get "$source_commit")" \
         || { notif "No test results for: $source_commit"
              return 1
            }
-
     notif "Clearing test results for: $source_commit"
-
     git update-ref -d "$ci_ref"
 }
 
 git_ci_clear_all() {
     local source_commit curr_commit
-
-    { source_commit="$1" && shift ; } || source_commit='HEAD'
+    set_source_commit "$@" || shift "$?"
 
     for curr_commit in $(git_ci_list "$source_commit"); do
         git_ci_clear "$curr_commit" || true
@@ -174,13 +181,11 @@ git_ci_diff() {
 }
 
 git_ci_show() {
-    local source_commit_one source_commit_two
+    local source_commit_one source_commit_two source_commit
     local tested_commit_one tested_commit_two
 
-    { source_commit_one="$1" \
-        && commit_exists "$source_commit_one" \
-        && shift
-    } || source_commit_one='HEAD'
+    set_source_commit "$@" || shift "$?"
+    source_commit_one="$source_commit"
     source_commit_two="$(git_ci_last "$source_commit_one^")"
 
     git_ci_diff "$source_commit_two" "$source_commit_one" "$@"
@@ -193,11 +198,7 @@ git_ci_gen_hist() {
     local source_commit source_ancestor source_message
     local tested_ancestor tested_ancestor_tree
     local generated_commit
-
-    { source_commit="$1" \
-        && commit_exists "$source_commit" \
-        && shift
-    } || source_commit='HEAD'
+    set_source_commit "$@" || shift "$?"
 
     while read source_ancestor; do
         local parent_args=()
@@ -217,11 +218,7 @@ git_ci_gen_hist() {
 
 git_ci_hist() {
     local source_commit
-
-    { source_commit="$1" \
-        && commit_exists "$source_commit" \
-        && shift
-    } || source_commit='HEAD'
+    set_source_commit "$@" || shift "$?"
 
     git log --abbrev-commit --decorate --date=relative --graph --topo-order \
             --format=format:'%C(bold green)%h%C(reset) - %C(dim blue)%s%C(reset) - %C(blue)%an%C(reset)%C(bold yellow)%d%C(reset)' \
@@ -245,9 +242,7 @@ git_ci_test() {
 
 git_ci_run() {
     local source_commit curhead exit_status
-
-    { source_commit="$1" && shift ; } || source_commit='HEAD'
-
+    set_source_commit "$@" || shift "$?"
     clean_worktree_or_die
 
     # TODO: record exit codes and report back correct exit code?
