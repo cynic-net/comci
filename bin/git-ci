@@ -228,7 +228,6 @@ git_ci_hist() {
 git_ci_cleanup() {
     git reset
     git checkout -- ./
-    git clean -dfx
 }
 
 git_ci_test() {
