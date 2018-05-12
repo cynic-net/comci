@@ -351,7 +351,7 @@ git_ci_run_sparse() {
     for bisect_commit_one in $(git_ci_list "$source_commit_two^"); do
         git_ci_run_bisect "$bisect_commit_one" "$bisect_commit_two" || exit_status="$?"
         bisect_commit_two="$bisect_commit_one"
-        [[ "$bisect_commit_one" != "$source_commit_one" ]] || break
+        [[ "$(git rev-parse "$bisect_commit_one")" != "$(git rev-parse "$source_commit_one")" ]] || break
     done
 
     return "$exit_status"
