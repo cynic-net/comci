@@ -301,17 +301,12 @@ set_source_commit_one_two() {
 }
 
 git_ci_run_linear() {
-    local curhead exit_status
+    local curhead
     local source_commit_one source_commit_two
 
     set_source_commit_one_two "$@" || shift "$?"
 
-    exit_status='0'
-    for commit_id in $(git rev-list "$source_commit_one^..$source_commit_two"); do
-        git_ci_run "$commit_id" || exit_status="$?"
-    done
-
-    exit "$exit_status"
+    git_ci_run $(git rev-list "$source_commit_one^..$source_commit_two")
 }
 
 git_ci_run_bisect() {
@@ -322,8 +317,7 @@ git_ci_run_bisect() {
 
     exit_status='0'
 
-    git_ci_run "$source_commit_one" || exit_status="$?"
-    git_ci_run "$source_commit_two" || exit_status="$?"
+    git_ci_run "$source_commit_one" "$source_commit_two" || exit_status="$?"
 
     if ! git_ci_diff "$source_commit_one" "$source_commit_two" --quiet -- $(git_ci_tracked_files); then
         mid_rev="$(git rev-list --bisect "$source_commit_one..$source_commit_two")"
@@ -347,8 +341,7 @@ git_ci_run_sparse() {
 
     exit_status='0'
 
-    git_ci_run "$source_commit_one" || exit_status="$?"
-    git_ci_run "$source_commit_two" || exit_status="$?"
+    git_ci_run "$source_commit_one" "$source_commit_two" || exit_status="$?"
 
     bisect_commit_two="$source_commit_two"
     for bisect_commit_one in $(git_ci_list "$source_commit_two^"); do
