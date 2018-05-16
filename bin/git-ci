@@ -244,30 +244,33 @@ git_ci_run() {
     local source_commit curhead exit_status
     set_source_commit "$@" || shift "$?"
     clean_worktree_or_die
+    exit_status='0'
 
     # TODO: record exit codes and report back correct exit code?
     # Perhaps with trailers in commit message? (git interpret-trailers)
     # Otherwise, `git ci run-bisect/sparse` may act strange.
-    ! git_ci_get "$source_commit" &>/dev/null \
-        || { notif "Test results already exist for: $source_commit"
-             return 0
-           }
+    if git_ci_get "$source_commit" &>/dev/null; then
+        notif "Test results already exist for: $source_commit"
+    else
+        notif "Running tests on commit: $source_commit"
 
-    notif "Running tests on commit: $source_commit"
+        curhead="$(git rev-parse --abbrev-ref HEAD)"
+        trap "git checkout $curhead ; exit 1" INT TERM EXIT
 
-    curhead="$(git rev-parse --abbrev-ref HEAD)"
-    trap "git checkout $curhead ; exit 1" INT TERM EXIT
+        git checkout "$source_commit"
 
-    git checkout "$source_commit"
+        git_ci_cleanup
+        git_ci_test     || exit_status="$?"
+        git_ci_add
+        git_ci_commit
+        git_ci_cleanup
 
-    exit_status='0'
-    git_ci_cleanup
-    git_ci_test     || exit_status="$?"
-    git_ci_add
-    git_ci_commit
-    git_ci_cleanup
+        git checkout "$curhead"
+    fi
 
-    git checkout "$curhead"
+    if [[ "$#" != '0' ]]; then
+        git_ci_run "$@" || exit_status="$?"
+    fi
 
     return "$exit_status"
 }
