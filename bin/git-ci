@@ -153,6 +153,23 @@ git_ci_list() {
     done
 }
 
+git_ci_listdiff() {
+    local source_commit source_commit_one source_commit_two last_commit
+    set_source_commit "$@" || shift "$?"
+    source_commit_one="$(git rev-parse "$source_commit")"
+    last_commit=''
+
+    echo "$source_commit_one"
+    while read source_commit_two; do
+        if ! git_ci_diff "$source_commit_two" "$source_commit_one" --quiet -- $(git_ci_tracked_files); then
+            echo "$source_commit_two"
+            source_commit_one="$source_commit_two"
+        fi
+        [[ "$source_commit_two" == '' ]] || last_commit="$source_commit_two"
+    done < <(git_ci_list "$source_commit_one")
+    [[ "$last_commit" == '' ]] || echo "$last_commit"
+}
+
 # Removing Results
 # ----------------
 
@@ -375,6 +392,7 @@ case "$git_ci_command" in
     last)       git_ci_last       "$@" ;;
     gen-hist)   git_ci_gen_hist   "$@" ;;
     list)       git_ci_list       "$@" ;;
+    listdiff)   git_ci_listdiff   "$@" ;;
     clear)      git_ci_clear      "$@" ;;
     clear-all)  git_ci_clear_all  "$@" ;;
     hist)       git_ci_hist       "$@" ;;
