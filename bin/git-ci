@@ -229,7 +229,7 @@ git_ci_gen_hist() {
         source_message="$(git log -n1 --format=%s "$source_ancestor")"
         generated_commit="$(git commit-tree "${parent_args[@]}" \
             "$tested_ancestor_tree" -m "ci: $testset: $source_message")"
-    done < <(git_ci_list "$source_commit" | tac)
+    done < <(git_ci_listdiff "$source_commit" | tac)
     echo "$generated_commit"
 }
 
