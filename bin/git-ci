@@ -105,6 +105,23 @@ git_ci_get() {
     echo "$ci_ref"
 }
 
+git_ci_diff() {
+    local source_commit_one source_commit_two
+    local tested_commit_one tested_commit_two
+
+    source_commit_one="$1" && shift
+    source_commit_two="$1" && shift
+
+    tested_commit_two="$(git_ci_get "$source_commit_two")"
+    if [[ "$source_commit_one" == '' ]]; then
+        tested_commit_one="$source_commit_two"
+    else
+        tested_commit_one="$(git_ci_get "$source_commit_one")"
+    fi
+
+    git diff "$tested_commit_one" "$tested_commit_two" "$@"
+}
+
 git_ci_last() {
     local source_commit curr_commit max_backtrack
     max_backtrack=50
@@ -162,23 +179,6 @@ git_ci_clear_all() {
 
 # Presenting Results
 # ------------------
-
-git_ci_diff() {
-    local source_commit_one source_commit_two
-    local tested_commit_one tested_commit_two
-
-    source_commit_one="$1" && shift
-    source_commit_two="$1" && shift
-
-    tested_commit_two="$(git_ci_get "$source_commit_two")"
-    if [[ "$source_commit_one" == '' ]]; then
-        tested_commit_one="$source_commit_two"
-    else
-        tested_commit_one="$(git_ci_get "$source_commit_one")"
-    fi
-
-    git diff "$tested_commit_one" "$tested_commit_two" "$@"
-}
 
 git_ci_show() {
     local source_commit_one source_commit_two source_commit
