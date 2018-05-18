@@ -164,7 +164,7 @@ git_ci_list() {
 git_ci_listdiff() {
     local source_commit source_commit_one source_commit_two last_commit
     set_source_commit "$@" || shift "$?"
-    source_commit_one="$(git rev-parse "$source_commit")"
+    source_commit_one="$(git rev-parse $(git_ci_last "$source_commit"))"
     last_commit=''
 
     echo "$source_commit_one"
@@ -237,7 +237,7 @@ git_ci_gen_hist() {
         source_message="$(git log -n1 --format=%s "$source_ancestor")"
         generated_commit="$(git commit-tree "${parent_args[@]}" \
             "$tested_ancestor_tree" -m "ci: $testset: $source_message")"
-    done < <(git_ci_listdiff "$source_commit" | tac)
+    done < <(git_ci_list "$source_commit" | tac)
     echo "$generated_commit"
 }
 
