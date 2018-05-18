@@ -53,6 +53,14 @@ git_ci_tracked_files() {
         || fatal "Entry not found: test.$testset.trackedFiles"
 }
 
+git_ci_config_exists_or_die() {
+    local config_entry total_entry
+    config_entry="$1"
+    total_entry="test.$testset.$config_entry"
+    git_ci_config --get "$total_entry" &>/dev/null \
+        || fatal "Entry not found: $total_entry"
+}
+
 # Storing Results
 # ---------------
 
@@ -373,8 +381,8 @@ git_ci_run_sparse() {
 # Main
 # ----
 
-git_ci_config --get-regexp "test.$testset" &>/dev/null \
-    || fatal "Entry not found in '$ci_config': test.$testset"
+git_ci_config_exists_or_die "command"
+git_ci_config_exists_or_die "trackedFiles"
 
 notif "$git_ci_command $testset $@"
 case "$git_ci_command" in
