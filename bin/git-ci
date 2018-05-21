@@ -3,8 +3,7 @@
 set -e
 # set -x
 
-git_ci_command="$1" && shift
-testset="$1"        && shift
+testset="$1" && shift
 
 ci_config=".ci"
 ci_ref_prefix="refs/ci/$testset"
@@ -391,6 +390,7 @@ git_ci_run_sparse() {
 git_ci_config_exists_or_die "command"
 git_ci_config_exists_or_die "trackedFiles"
 
+git_ci_command="$1" && shift
 notif "$git_ci_command $testset $@"
 case "$git_ci_command" in
     cleanup)     git_ci_cleanup          ;;
