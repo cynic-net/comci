@@ -247,13 +247,12 @@ git_ci_gen_hist() {
     echo "$generated_commit"
 }
 
+# assumes that you have `git hist` command.
 git_ci_hist() {
     local source_commit
     set_source_commit "$@" || shift "$?"
 
-    git log --abbrev-commit --decorate --date=relative --graph --topo-order \
-            --format=format:'%C(bold green)%h%C(reset) - %C(dim blue)%s%C(reset) - %C(blue)%an%C(reset)%C(bold yellow)%d%C(reset)' \
-            "$(git_ci_gen_hist "$source_commit")" "$source_commit" "$@"
+    git hist "$(git_ci_gen_hist "$source_commit")" "$source_commit" "$@"
 }
 
 # Running Tests
