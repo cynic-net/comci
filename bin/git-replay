@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+set -e
+
+commit_ref="$1" && shift
+commit_id="$(git rev-parse "$commit_ref")"
+
+# Utilities
+# ---------
+
+notif() { echo "== git replay: $@" >&2 ; }
+fatal() { notif "$@" ; exit 1 ;          }
+
+clean_worktree_or_die() {
+    git submodule update --init
+    if ! git diff --quiet; then
+        fatal "Must run with a clean worktree!!!"
+    fi
+}
+
+# Main
+# ----
+
+clean_worktree_or_die
+
+git log --max-count=1 --format='format:%b' "$commit_id" | bash
+git commit --reuse-message="$commit_id" --no-edit
