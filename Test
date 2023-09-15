@@ -10,5 +10,6 @@ cd "$PROJDIR"
 [[ ${#@} -gt 0 && $1 == -C ]] && { shift; rm -rf .build; }
 
 . ./pactivate
-bin/git-tscript
+PATH="$PROJDIR/bin:$PATH"
+git tscript
 PASSED=true
