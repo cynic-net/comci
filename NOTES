@@ -1,6 +1,9 @@
 git-ci
 ======
 
+    NOTE: This is an archived version of an old plan for this project. See
+    the `main` branch for the current version.
+
 Our CI world is about tests run in many [worktree]s (often hundreds).
 For a given repo, each developer is likely to have several worktrees
 on his computer in which he runs tests, there may be CI servers may
