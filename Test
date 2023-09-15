@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+PASSED=false
+trap 'e=$?; $PASSED || { echo 1>&2 "FAILED (exitcode=$e}"; exit $e; }' 0
+
+PROJDIR=$(cd $(dirname "$0") && pwd -P)
+
+cd "$PROJDIR"
+[[ ${#@} -gt 0 && $1 == -C ]] && { shift; rm -rf .build; }
+
+. ./pactivate
+bin/git-tscript
+PASSED=true
