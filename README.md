@@ -6,8 +6,8 @@ integration tests for a Git commit and storing the results of those tests
 in the Git repo, associated with the Git commit against which they were
 run.
 
-This is an aid to [_continuous integration,_][ci] a concept from [_extreme
-programming_] where the entire system as currently under development is
+This is an aid to [_continuous integration,_][ci] a concept from [Extreme
+Programming][xp] where the entire system as currently under development is
 tested very frequently: at least once per day but preferably more often.
 These tests may be started manually (by simply running `git tscript`
 frequently) or assissted by a system that runs the tests automatically,
