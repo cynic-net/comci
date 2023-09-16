@@ -2,7 +2,13 @@
 set -euo pipefail
 
 PASSED=false
-trap 'e=$?; $PASSED || { echo 1>&2 "FAILED (exitcode=$e}"; exit $e; }' 0
+trap '
+    e=$?
+    $PASSED && msg="════════════ PASSED" \
+            || msg="════════════ FAILED (exitcode=$e)"
+    echo 1>&2 "$msg"
+    exit $e
+}' 0
 
 PROJDIR=$(cd $(dirname "$0") && pwd -P)
 
@@ -11,5 +17,15 @@ cd "$PROJDIR"
 
 . ./pactivate
 PATH="$PROJDIR/bin:$PATH"
-git tscript
+cd "$PROJDIR"
+
+#   Since we're testing tscript, we don't want to use it. So we manually
+#   run through all the tests under comci-tests/ instead. Nor are tscript
+#   used here; instead we just pass in whatever came from the command line.
+for t in comci-tests/*; do
+    [[ -f "$t" && -x "$t" ]] || continue      # `test` follows symlinks
+    echo "════════════ $t"
+    "$t" "$@"
+done
+
 PASSED=true

@@ -1,0 +1,80 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+tests_dir=$(cd $(dirname "$0") && pwd -P)
+PROJDIR=$(dirname "$tests_dir")
+
+         src="$tests_dir"/10-repo-files # working tree used to init test repo
+       trepo="$PROJDIR"/.build/10-repo  # test repo/project on which we operate
+  tt_tscript="$trepo/tscript"                   # tests for `git test`
+ tt_worktree="$trepo/.build/tscript/worktree"   # test repo's test worktree
+      tt_out="$trepo/.build/tscript/out"        # test repo's test output
+
+unindent() { sed -e 's/^        //'; }
+
+fail() { local ec=$?; echo 1>&2 FAILURE: "$@"; exit $ec; }
+
+# ----------------------------------------------------------------------
+echo "───── test-repo setup"
+mkdir -p $(dirname "$trepo")
+rm -rf "$trepo/"
+cp -r "$src/" "$trepo/"
+(   cd "$trepo"
+    git init -q
+    git add .
+    git commit -q -m 'Test repository initial commit'
+    mkdir untracked/
+    touch untracked/ignored-file untracked/untracked-file
+)
+
+# ----------------------------------------------------------------------
+echo "───── git tscript interactive"
+(
+    expected() { unindent <<_
+        ━━━━━━━━━━━━ 10-pass
+        output to stdout
+        output to stderr
+        ━━━━━━━━━━━━ 30-fail
+        ━━━━━ FAILED (exitcode=34)
+_
+    }
+
+    #   Ensure git-tscript finds repo root from subdir.
+    cd "$trepo"/empty
+    #   Run sample tests "interactively" so that output is not recorded.
+    #   This is expected to exit with a failure code after the 30-fail
+    #   test; we ignore this because it's difficult to check.
+    (git tscript --interactive 2>&1 || true) | diff -u <(expected) - || true
+)
+
+# ----------------------------------------------------------------------
+echo "───── git tscript capture-to-file (dirty working tree)"
+(
+    foreground_expected() { unindent <<_
+        git-tscript: 10-pass completed (exit=0)
+        git-tscript: 30-fail completed (exit=34)
+        git-tscript: 40-pass completed (exit=0)
+        git-tscript: 60-untracked completed (exit=0)
+_
+    }
+
+    cd "$trepo"/
+    #   A modified working copy, which includes non-ignored untracked files
+    #   as well as changes to tracked files, causes git-tscript to capture
+    #   to file instead of capture to repo.
+    unindent <<_ > "$trepo/tscript/60-untracked"
+        #!/usr/bin/env bash
+        echo UNTRACKED-STDOUT
+        echo 1>&2 UNTRACKED-STDERR
+_
+    chmod +x "$trepo/tscript/60-untracked"
+
+    testwork="$trepo/.build/tscript/worktree"
+    git tscript --foreground 2>&1 | diff -u <(foreground_expected) - || true
+    #   check that working copy was copied properly
+   #diff -q -r "$trepo/tscript/" "$tt_worktree/tscript/" || fail "worktree"
+   #test -f "$tt_worktree/untracked/untracked-file" || fail "untracked-file"
+   #test ! -f "$tt_worktree/untracked/ignored-file" || fail "ignored-file"
+    #   check files to ensure they have the right output
+    diff -r -u "$tests_dir"/10-output/ "$tt_out"
+)

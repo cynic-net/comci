@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+exit 34 # test failure
