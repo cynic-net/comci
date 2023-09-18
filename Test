@@ -2,7 +2,11 @@
 set -euo pipefail
 
 PASSED=false
-trap 'e=$?; $PASSED || { echo 1>&2 "FAILED (exitcode=$e}"; exit $e; }' 0
+trap '
+    e=$?; $PASSED || {
+        echo 1>&2 -e "━━━━━━━━━━━━FAILED (exitcode=$e}"
+        exit $e
+}' 0
 
 PROJDIR=$(cd $(dirname "$0") && pwd -P)
 
@@ -11,5 +15,16 @@ cd "$PROJDIR"
 
 . ./pactivate
 PATH="$PROJDIR/bin:$PATH"
-git tscript
+cd "$PROJDIR"
+
+#   Since we're testing tscript, we don't want to use it. So we manually
+#   run through all the tests instead, similar how tscript would do it in
+#   certain modes. Note that tscript parameters are not used here; instead
+#   we just pass in whatever came from the command line.
+for ts in tscript/*; do
+    [[ -f "$ts" && -x "$ts" ]] || continue
+    echo "━━━━━━━━━━━━ $ts"
+    "$ts" "$@"
+done
+
 PASSED=true
