@@ -15,7 +15,16 @@ cp -r "$trepo_src/" "$trepo_work/"
     git commit -q -m 'Test repository initial commit'
 )
 
+expected() {
+    cat <<_____
+━━━━━━━━━━━━ 10-pass
+━━━━━━━━━━━━ 20-pass
+_____
+}
+
 echo "----- git tscript"
-(   cd "$trepo_work"/empty      # ensure git-tscript finds repo root
-    git tscript -i              # run all our fake tests interactively
+(   #   Ensure git-tscript finds repo root from subdir.
+    cd "$trepo_work"/empty
+    #   Run sample tests "interactively" so that output is not recorded.
+    git tscript -i | diff -u <(expected) -
 )
