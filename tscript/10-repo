@@ -4,14 +4,18 @@ set -euo pipefail
 PROJDIR=$(cd $(dirname "$0")/.. && pwd -P)
 trepo_src="$PROJDIR"/tscript/test-repo
 trepo_work="$PROJDIR"/.build/test-repo
+
+echo "----- test-repo setup"
 mkdir -p $(dirname "$trepo_work")
 rm -rf "$trepo_work/"
 cp -r "$trepo_src/" "$trepo_work/"
-(
-    cd "$trepo_work"
-    git init
+(   cd "$trepo_work"
+    git init -q
     git add .
-    git commit -m 'Test repository initial commit'
-    echo =====
-    git status -bs
+    git commit -q -m 'Test repository initial commit'
+)
+
+echo "----- git tscript"
+(   cd "$trepo_work"/empty      # ensure git-tscript finds repo root
+    git tscript -i              # run all our fake tests interactively
 )
