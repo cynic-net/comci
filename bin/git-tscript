@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 
-from    os  import getcwd
+from    os  import chdir, getcwd
+from    pathlib  import Path
 from    sys  import stderr
 
 from    pygit2  import *
 
 
 def debug(*s):
+    return
     print(*s, file=stderr)
 
 def find_repo():
@@ -21,4 +23,8 @@ def find_repo():
 
 if __name__ == '__main__':
     repo = find_repo()
-    print(repo.raw_listall_branches())
+    project_root = Path(repo.path).parent
+    chdir(project_root)
+    for pts in sorted(project_root.glob('tscript/*')):
+        ts = pts.name
+        print('━━━━━━━━━━━━ {}'.format(ts))
