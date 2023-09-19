@@ -3,6 +3,7 @@
 from    os  import chdir, getcwd
 from    pathlib  import Path
 from    stat  import S_IXUSR
+from    subprocess  import run
 from    sys  import stderr
 
 from    pygit2  import *
@@ -10,7 +11,14 @@ from    pygit2  import *
 
 def debug(*s):
     return
-    print(*s, file=stderr)
+    print(*s, file=stderr, flush=True)
+
+def fprint(*args):
+    print(*args, flush=True)
+
+def die(exitcode, *s):
+    print(*s, file=stderr, flush=True)
+    exit(exitcode)
 
 def find_repo():
     cwd = getcwd()
@@ -27,12 +35,30 @@ def tscripts(project_root):
         if not pts.is_file() or not is_exec: continue
         yield pts
 
+def run_ts(ts, arg=None, interactive=False):
+    if arg is None:
+        command = [ts]
+        fprint('━━━━━━━━━━━━ {}'.format(ts.name))
+    else:
+        command = [ts, arg]
+        fprint('━━━━━━━━━━━━ {} {}'.format(ts.name, arg))
+
+    if interactive:
+        ec = run(command).returncode
+        if ec != 0:
+            die(ec, 'FAILED (exitcode={})'.format(ec))
+    else:
+        #   This should set up the output to be captured into the repo
+        #   (or files if working copy is modified) and then run the
+        #   test in the background, not waiting for completion.
+        raise NotImplementedError('XXX write me')
+
 def main():
     repo = find_repo()
     project_root = Path(repo.path).parent
     chdir(project_root)
     for ts in tscripts(project_root):
-        print('━━━━━━━━━━━━ {}'.format(ts.name))
+        run_ts(ts, interactive=True)    # XXX should be from parsed arg
 
 if __name__ == '__main__':
     main()

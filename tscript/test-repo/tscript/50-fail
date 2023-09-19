@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+#
+#   You can temporarily mark this as executable to see a failure.
+#
+exit 34
