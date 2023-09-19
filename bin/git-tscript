@@ -2,6 +2,7 @@
 
 from    os  import chdir, getcwd
 from    pathlib  import Path
+from    stat  import S_IXUSR
 from    sys  import stderr
 
 from    pygit2  import *
@@ -26,5 +27,7 @@ if __name__ == '__main__':
     project_root = Path(repo.path).parent
     chdir(project_root)
     for pts in sorted(project_root.glob('tscript/*')):
+        is_exec = pts.stat().st_mode & S_IXUSR
+        if not pts.is_file() or not is_exec: continue
         ts = pts.name
         print('━━━━━━━━━━━━ {}'.format(ts))
