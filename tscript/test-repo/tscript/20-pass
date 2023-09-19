@@ -1,4 +1,2 @@
-#!/usr/bin/env bash
-set -euo pipefail
-
-true        # Always passes
+#!/usr/bin/env python3
+exit(0)

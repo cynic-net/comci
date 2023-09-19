@@ -26,5 +26,5 @@ echo "----- git tscript"
 (   #   Ensure git-tscript finds repo root from subdir.
     cd "$trepo_work"/empty
     #   Run sample tests "interactively" so that output is not recorded.
-    git tscript -i | diff -u <(expected) -
+    git tscript -i 2>&1 | diff -u <(expected) -
 )
