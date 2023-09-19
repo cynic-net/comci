@@ -3,9 +3,11 @@ set -euo pipefail
 
 PASSED=false
 trap '
-    e=$?; $PASSED || {
-        echo 1>&2 -e "━━━━━━━━━━━━FAILED (exitcode=$e}"
-        exit $e
+    e=$?
+    $PASSED && msg="════════════ PASSED" \
+            || msg="════════════ FAILED (exitcode=$e)"
+    echo 1>&2 "$msg"
+    exit $e
 }' 0
 
 PROJDIR=$(cd $(dirname "$0") && pwd -P)
@@ -22,8 +24,8 @@ cd "$PROJDIR"
 #   certain modes. Note that tscript parameters are not used here; instead
 #   we just pass in whatever came from the command line.
 for ts in tscript/*; do
-    [[ -f "$ts" && -x "$ts" ]] || continue
-    echo "━━━━━━━━━━━━ $ts"
+    [[ -f "$ts" && -x "$ts" ]] || continue      # `test` follows symlinks
+    echo "════════════ $ts"
     "$ts" "$@"
 done
 
