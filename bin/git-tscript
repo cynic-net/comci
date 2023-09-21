@@ -18,6 +18,7 @@ def fprint(*args):
 
 def die(exitcode, *s):
     print(*s, file=stderr, flush=True)
+    print( 'XXX exitcode:', exitcode, file=stderr, flush=True)
     exit(exitcode)
 
 def find_repo():
