@@ -35,7 +35,16 @@ def tscripts(project_root):
         if not pts.is_file() or not is_exec: continue
         yield pts
 
-def run_ts(ts, arg=None, interactive=False):
+def run_ts_interactive(arg=None):
+    run_ts(arg)
+
+def run_ts_capture():
+    #   This should set up the output to be captured into the repo
+    #   (or files if working copy is modified) and then run the
+    #   test in the background, not waiting for completion.
+    raise NotImplementedError('XXX write me')
+
+def run_ts(ts, arg=None, io=(None, None, None, None)):
     if arg is None:
         command = [ts]
         fprint('━━━━━━━━━━━━ {}'.format(ts.name))
@@ -43,22 +52,16 @@ def run_ts(ts, arg=None, interactive=False):
         command = [ts, arg]
         fprint('━━━━━━━━━━━━ {} {}'.format(ts.name, arg))
 
-    if interactive:
-        ec = run(command).returncode
-        if ec != 0:
-            die(ec, 'FAILED (exitcode={})'.format(ec))
-    else:
-        #   This should set up the output to be captured into the repo
-        #   (or files if working copy is modified) and then run the
-        #   test in the background, not waiting for completion.
-        raise NotImplementedError('XXX write me')
+    ec = run(command).returncode
+    if ec != 0:
+        die(ec, 'FAILED (exitcode={})'.format(ec))
 
 def main():
     repo = find_repo()
     project_root = Path(repo.path).parent
     chdir(project_root)
     for ts in tscripts(project_root):
-        run_ts(ts, interactive=True)    # XXX should be from parsed arg
+        run_ts_interactive(ts)    # XXX should be from parsed arg
 
 if __name__ == '__main__':
     main()
