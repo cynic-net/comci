@@ -10,32 +10,35 @@ from    sys  import stderr
 from    pygit2  import *
 
 
-def debug(*s):
-    return
-    print(*s, file=stderr, flush=True)
+####################################################################
+#   Main
 
-def fprint(*args):
-    print(*args, flush=True)
+ARGS = None     # set by parseargs()
 
-def die(exitcode, *s):
-    print(*s, file=stderr, flush=True)
-    print( 'XXX exitcode:', exitcode, file=stderr, flush=True)
-    exit(exitcode)
+def main():
+    ARGS = parseargs()
+    repo = find_repo()
+    project_root = Path(repo.path).parent
+    chdir(project_root)
+    for ts in tscripts(project_root):
+        #   XXX in both cases here we should be dealing with the optional
+        #   single argument to the test(s) somehow?
+        if ARGS.interactive:
+            run_ts_interactive(ts)
+        else:
+            run_ts_capture(foreground=ARGS.foreground)
 
-def find_repo():
-    cwd = getcwd()
-    debug('cwd:', cwd)
-    repo_path = discover_repository(cwd)
-    debug('repo_path:', repo_path)
-    repo = Repository(repo_path)
-    debug('repo:', repo)
-    return repo
+def parseargs():
+    p = ArgumentParser(description='''
+        Summary of what this program does.
+        And details on further lines.''',
+        epilog='Text after options are listed')
+    p.add_argument('-i', '--interactive', action='store_true')
+    p.add_argument('-f', '--foreground', action='store_true')
+    return p.parse_args()
 
-def tscripts(project_root):
-    for pts in sorted(project_root.glob('tscript/*')):
-        is_exec = pts.stat().st_mode & S_IXUSR
-        if not pts.is_file() or not is_exec: continue
-        yield pts
+####################################################################
+#   Run process functions
 
 def run_ts_interactive(arg=None):
     run_ts(arg)
@@ -58,21 +61,39 @@ def run_ts(ts, arg=None, io=(None, None, None, None)):
     if ec != 0:
         die(ec, 'FAILED (exitcode={})'.format(ec))
 
-def main():
-    repo = find_repo()
-    project_root = Path(repo.path).parent
-    chdir(project_root)
-    for ts in tscripts(project_root):
-        run_ts_interactive(ts)    # XXX should be from parsed arg
+####################################################################
+#   File system functions
 
-def parseargs():
-    p = ArgumentParser(description='''
-        Summary of what this program does.
-        And details on further lines.''',
-        epilog='Text after options are listed')
-    p.add_argument('-i', '--interactive', action='store_true')
-    global ARGS; ARGS = p.parse_args()
+def find_repo():
+    cwd = getcwd()
+    debug('cwd:', cwd)
+    repo_path = discover_repository(cwd)
+    debug('repo_path:', repo_path)
+    repo = Repository(repo_path)
+    debug('repo:', repo)
+    return repo
 
-if __name__ == '__main__':
-    parseargs()
-    main()
+def tscripts(project_root):
+    for pts in sorted(project_root.glob('tscript/*')):
+        is_exec = pts.stat().st_mode & S_IXUSR
+        if not pts.is_file() or not is_exec: continue
+        yield pts
+
+####################################################################
+#   Print and fail functions
+
+def debug(*s):
+    return
+    print(*s, file=stderr, flush=True)
+
+def fprint(*args):
+    print(*args, flush=True)
+
+def die(exitcode, *s):
+    print(*s, file=stderr, flush=True)
+    print( 'XXX exitcode:', exitcode, file=stderr, flush=True)
+    exit(exitcode)
+
+####################################################################
+
+if __name__ == '__main__': main()
