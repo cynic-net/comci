@@ -19,13 +19,16 @@ echo "───── git tscript interactive"
 (
     expected() { cat <<_____
 ━━━━━━━━━━━━ 10-pass
-━━━━━━━━━━━━ 20-pass
+━━━━━━━━━━━━ 30-fail
+━━━━━ FAILED (exitcode=34)
 _____
 }
     #   Ensure git-tscript finds repo root from subdir.
     cd "$trepo_work"/empty
     #   Run sample tests "interactively" so that output is not recorded.
-    git tscript --interactive 2>&1 | diff -u <(expected) -
+    #   This is expected to exit with a failure code after the 30-fail
+    #   test; we ignore this because it's difficult to check.
+    (git tscript --interactive 2>&1 || true) | diff -u <(expected) -
 )
 
 echo "───── git tscript capture-to-file"
@@ -45,9 +48,6 @@ UNTRACKED
 _____
 }
     cd "$trepo_work"/
-    #   We can now check failing tscripts because non-interactive mode
-    #   runs all scripts even if any fail.
-    chmod +x tscript/50-fail
     #   A modified working copy, which includes non-ignored untracked files
     #   as well as changes to tracked files, causes git-tscript to capture
     #   to file instead of capture to repo.
