@@ -17,8 +17,7 @@ cp -r "$trepo_src/" "$trepo_work/"
 
 echo "───── git tscript interactive"
 (
-    expected() {
-        cat <<_____
+    expected() { cat <<_____
 ━━━━━━━━━━━━ 10-pass
 ━━━━━━━━━━━━ 20-pass
 _____
@@ -31,16 +30,14 @@ _____
 
 echo "───── git tscript capture-to-file"
 (   
-    foreground_expected() {
-        cat <<_____
+    foreground_expected() { cat <<_____
 git-tscript: 10-pass completed (exit=0)
 git-tscript: 20-pass completed (exit=0)
 git-tscript: 50-fail completed (exit=34)
 git-tscript: 60-untracked completed (exit=0)
 _____
 }
-    stdout_expected() {
-        cat <<_____
+    stdout_expected() { cat <<_____
 ━━━━━━━━━━━━ 10-pass
 ━━━━━━━━━━━━ 20-pass
 ━━━━━━━━━━━━ 60-untracked

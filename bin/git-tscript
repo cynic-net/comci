@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from    argparse  import ArgumentParser
 from    os  import chdir, getcwd
 from    pathlib  import Path
 from    stat  import S_IXUSR
@@ -64,5 +65,14 @@ def main():
     for ts in tscripts(project_root):
         run_ts_interactive(ts)    # XXX should be from parsed arg
 
+def parseargs():
+    p = ArgumentParser(description='''
+        Summary of what this program does.
+        And details on further lines.''',
+        epilog='Text after options are listed')
+    p.add_argument('-i', '--interactive', action='store_true')
+    global ARGS; ARGS = p.parse_args()
+
 if __name__ == '__main__':
+    parseargs()
     main()
