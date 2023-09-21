@@ -39,7 +39,7 @@ def tscripts(project_root):
 def run_ts_interactive(arg=None):
     run_ts(arg)
 
-def run_ts_capture():
+def run_ts_capture(foreground):
     #   This should set up the output to be captured into the repo
     #   (or files if working copy is modified) and then run the
     #   test in the background, not waiting for completion.

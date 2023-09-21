@@ -22,9 +22,19 @@ expected() {
 _____
 }
 
-echo "----- git tscript"
+echo "----- git tscript interactive"
 (   #   Ensure git-tscript finds repo root from subdir.
     cd "$trepo_work"/empty
     #   Run sample tests "interactively" so that output is not recorded.
-    git tscript -i 2>&1 | diff -u <(expected) -
+    git tscript --interactive 2>&1 | diff -u <(expected) -
+)
+
+echo "----- git tscript capture-to-file"
+(   cd "$trepo_work"/
+    #   A modified working copy, which includes non-ignored untracked files
+    #   as well as changes to tracked files, causes git-tscript to capture
+    #   to file instead of capture to repo.
+    echo '#!/usr/bin/env true' > "$trepo_work/tscript/60-untracked"
+    git tscript --foreground 2>&1 | diff -u <(expected) -
+    #   XXX check files to ensure they have the right output
 )
