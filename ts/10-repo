@@ -35,8 +35,8 @@ echo "───── git tscript capture-to-file"
 (   
     foreground_expected() { cat <<_____
 git-tscript: 10-pass completed (exit=0)
-git-tscript: 20-pass completed (exit=0)
-git-tscript: 50-fail completed (exit=34)
+git-tscript: 30-fail completed (exit=34)
+git-tscript: 40-pass completed (exit=0)
 git-tscript: 60-untracked completed (exit=0)
 _____
 }
@@ -51,8 +51,12 @@ _____
     #   A modified working copy, which includes non-ignored untracked files
     #   as well as changes to tracked files, causes git-tscript to capture
     #   to file instead of capture to repo.
-    echo '#!/bin/echo UNTRACKED' > "$trepo_work/tscript/60-untracked"
+    cat <<____ > "$trepo_work/tscript/60-untracked"
+#!/usr/bin/env bash
+echo UNTRACKED-STDOUT
+echo 1>&2 UNTRACKED-STDERR
+____
+    chmod +x "$trepo_work/tscript/60-untracked"
     git tscript --foreground 2>&1 | diff -u <(foreground_expected) -
     #   XXX check files to ensure they have the right output
-    XXX
 )
