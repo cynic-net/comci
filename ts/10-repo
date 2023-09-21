@@ -5,7 +5,7 @@ PROJDIR=$(cd $(dirname "$0")/.. && pwd -P)
 trepo_src="$PROJDIR"/trepo
 trepo_work="$PROJDIR"/.build/trepo
 
-echo "----- test-repo setup"
+echo "───── test-repo setup"
 mkdir -p $(dirname "$trepo_work")
 rm -rf "$trepo_work/"
 cp -r "$trepo_src/" "$trepo_work/"
@@ -15,26 +15,47 @@ cp -r "$trepo_src/" "$trepo_work/"
     git commit -q -m 'Test repository initial commit'
 )
 
-expected() {
-    cat <<_____
+echo "───── git tscript interactive"
+(
+    expected() {
+        cat <<_____
 ━━━━━━━━━━━━ 10-pass
 ━━━━━━━━━━━━ 20-pass
 _____
 }
-
-echo "----- git tscript interactive"
-(   #   Ensure git-tscript finds repo root from subdir.
+    #   Ensure git-tscript finds repo root from subdir.
     cd "$trepo_work"/empty
     #   Run sample tests "interactively" so that output is not recorded.
     git tscript --interactive 2>&1 | diff -u <(expected) -
 )
 
-echo "----- git tscript capture-to-file"
-(   cd "$trepo_work"/
+echo "───── git tscript capture-to-file"
+(   
+    foreground_expected() {
+        cat <<_____
+git-tscript: 10-pass completed (exit=0)
+git-tscript: 20-pass completed (exit=0)
+git-tscript: 50-fail completed (exit=34)
+git-tscript: 60-untracked completed (exit=0)
+_____
+}
+    stdout_expected() {
+        cat <<_____
+━━━━━━━━━━━━ 10-pass
+━━━━━━━━━━━━ 20-pass
+━━━━━━━━━━━━ 60-untracked
+UNTRACKED
+_____
+}
+    cd "$trepo_work"/
+    #   We can now check failing tscripts because non-interactive mode
+    #   runs all scripts even if any fail.
+    chmod +x tscript/50-fail
     #   A modified working copy, which includes non-ignored untracked files
     #   as well as changes to tracked files, causes git-tscript to capture
     #   to file instead of capture to repo.
-    echo '#!/usr/bin/env true' > "$trepo_work/tscript/60-untracked"
-    git tscript --foreground 2>&1 | diff -u <(expected) -
+    echo '#!/bin/echo UNTRACKED' > "$trepo_work/tscript/60-untracked"
+    git tscript --foreground 2>&1 | diff -u <(foreground_expected) -
     #   XXX check files to ensure they have the right output
+    XXX
 )
