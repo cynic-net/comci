@@ -5,7 +5,7 @@ from    os  import chdir, getcwd
 from    pathlib  import Path
 from    stat  import S_IXUSR
 from    subprocess  import run
-from    sys  import stderr
+from    sys  import stdout, stderr
 
 from    pygit2  import *
 
@@ -38,28 +38,51 @@ def parseargs():
     return p.parse_args()
 
 ####################################################################
-#   Run process functions
+#   Run single tests.
 
-def run_ts_interactive(arg=None):
-    run_ts(arg)
+def run_ts_interactive(ts, arg=None):
+    ''' Run a single test script in "interactive" mode, with the
+        stdin/stdout/stderr of this process, wait for the child process to
+        exit, and return if the test was successful (child exited with
+        zero) or exit this program with the same exit code the child
+        returned.
+    '''
+    ec = run_ts(ts, arg)
+    if ec != 0: exit(ec)
 
 def run_ts_capture(foreground):
     #   This should set up the output to be captured into the repo
     #   (or files if working copy is modified) and then run the
     #   test in the background, not waiting for completion.
+    #   XXX 1. run test
+    #   XXX 2. implement capture to file
+    #   XXX 3. implement background running
+    #   XXX 4. implement capture to repo commit
+
     raise NotImplementedError('XXX write me')
 
-def run_ts(ts, arg=None, io=(None, None, None, None)):
+def run_ts(ts, arg=None, io=(None, None, None)):
+    ''' Log a test header to `io[1]` (`stdout` if it's `None`) and run
+        the program at path `ts`. `io` is a tuple of file descriptors for
+        ``(stdin, stdout, stderr)``; `None` values indicate to inherit the
+        file descriptor from this process.
+
+        This logs a 'FAILED message if the child process returns any
+        exit code other than 0. It returns the exit code of the child
+        process.
+    '''
+    header_fd = io[1];
+    if header_fd is None: header_fd = stdout
     if arg is None:
         command = [ts]
-        fprint('━━━━━━━━━━━━ {}'.format(ts.name))
+        fprint(header_fd, '━━━━━━━━━━━━ {}'.format(ts.name))
     else:
         command = [ts, arg]
-        fprint('━━━━━━━━━━━━ {} {}'.format(ts.name, arg))
+        fprint(header_fd, '━━━━━━━━━━━━ {} {}'.format(ts.name, arg))
 
     ec = run(command).returncode
-    if ec != 0:
-        die(ec, 'FAILED (exitcode={})'.format(ec))
+    if ec != 0: fprint(header_fd, '━━━━━ FAILED (exitcode={})'.format(ec))
+    return ec
 
 ####################################################################
 #   File system functions
@@ -86,8 +109,8 @@ def debug(*s):
     return
     print(*s, file=stderr, flush=True)
 
-def fprint(*args):
-    print(*args, flush=True)
+def fprint(fd, *args):
+    print(*args, file=fd, flush=True)
 
 def die(exitcode, *s):
     print(*s, file=stderr, flush=True)
