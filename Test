@@ -20,10 +20,9 @@ PATH="$PROJDIR/bin:$PATH"
 cd "$PROJDIR"
 
 #   Since we're testing tscript, we don't want to use it. So we manually
-#   run through all the tests instead, similar how tscript would do it in
-#   certain modes. Note that tscript parameters are not used here; instead
-#   we just pass in whatever came from the command line.
-for ts in tscript/*; do
+#   run through all the tests under t/ instead. Nor are tscript used here;
+#   instead we just pass in whatever came from the command line.
+for ts in ts/*; do
     [[ -f "$ts" && -x "$ts" ]] || continue      # `test` follows symlinks
     echo "════════════ $ts"
     "$ts" "$@"

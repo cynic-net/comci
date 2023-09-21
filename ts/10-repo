@@ -2,8 +2,8 @@
 set -euo pipefail
 
 PROJDIR=$(cd $(dirname "$0")/.. && pwd -P)
-trepo_src="$PROJDIR"/tscript/test-repo
-trepo_work="$PROJDIR"/.build/test-repo
+trepo_src="$PROJDIR"/trepo
+trepo_work="$PROJDIR"/.build/trepo
 
 echo "----- test-repo setup"
 mkdir -p $(dirname "$trepo_work")
