@@ -24,9 +24,9 @@ def main():
         #   XXX in both cases here we should be dealing with the optional
         #   single argument to the test(s) somehow?
         if ARGS.interactive:
-            run_ts_interactive(ts)
+            run_ts_interactive(ts, arg=None)
         else:
-            run_ts_capture(foreground=ARGS.foreground)
+            run_ts_capture(ts, arg=None, foreground=ARGS.foreground)
 
 def parseargs():
     p = ArgumentParser(description='''
@@ -50,7 +50,7 @@ def run_ts_interactive(ts, arg=None):
     ec = run_ts(ts, arg)
     if ec != 0: exit(ec)
 
-def run_ts_capture(foreground):
+def run_ts_capture(ts, arg=None, foreground=False):
     #   This should set up the output to be captured into the repo
     #   (or files if working copy is modified) and then run the
     #   test in the background, not waiting for completion.
@@ -59,7 +59,9 @@ def run_ts_capture(foreground):
     #   XXX 3. implement background running
     #   XXX 4. implement capture to repo commit
 
-    raise NotImplementedError('XXX write me')
+    ec = run_ts(ts, arg)
+    fprint(stdout, 'git-tscript: {}{} completed (exit={})'.format(
+        ts.name, ' ' + arg if arg else '', ec))
 
 def run_ts(ts, arg=None, io=(None, None, None)):
     ''' Log a test header to `io[1]` (`stdout` if it's `None`) and run
