@@ -4,7 +4,7 @@ from    argparse  import ArgumentParser
 from    os  import chdir, getcwd
 from    pathlib  import Path
 from    stat  import S_IXUSR
-from    subprocess  import run
+from    subprocess  import run, DEVNULL
 from    sys  import stdout, stderr
 
 from    pygit2  import *
@@ -51,15 +51,18 @@ def run_ts_interactive(ts, arg=None):
     if ec != 0: exit(ec)
 
 def run_ts_capture(ts, arg=None, foreground=False):
+    ''' XXX capture output
+
+        ``stdin`` is always ``/dev/null``.
+    '''
     #   This should set up the output to be captured into the repo
     #   (or files if working copy is modified) and then run the
     #   test in the background, not waiting for completion.
-    #   XXX 1. run test
     #   XXX 2. implement capture to file
     #   XXX 3. implement background running
     #   XXX 4. implement capture to repo commit
 
-    ec = run_ts(ts, arg)
+    ec = run_ts(ts, arg, io=(DEVNULL, None, None))
     fprint(stdout, 'git-tscript: {}{} completed (exit={})'.format(
         ts.name, ' ' + arg if arg else '', ec))
 
@@ -82,7 +85,8 @@ def run_ts(ts, arg=None, io=(None, None, None)):
         command = [ts, arg]
         fprint(header_fd, '━━━━━━━━━━━━ {} {}'.format(ts.name, arg))
 
-    ec = run(command).returncode
+    debug('io:', io)
+    ec = run(command, stdin=io[0], stdout=io[1], stderr=io[2]).returncode
     if ec != 0: fprint(header_fd, '━━━━━ FAILED (exitcode={})'.format(ec))
     return ec
 
