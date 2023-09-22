@@ -58,7 +58,7 @@ def run_ts_capture(ts, arg=None, foreground=False):
     #   This should set up the output to be captured into the repo
     #   (or files if working copy is modified) and then run the
     #   test in the background, not waiting for completion.
-    #   XXX 2. implement capture to file
+    #   XXX 2. implement capture to file: `.build/tscript.out/TS.ARG.out`
     #   XXX 3. implement background running
     #   XXX 4. implement capture to repo commit
 
