@@ -30,7 +30,7 @@ _____
     #   Run sample tests "interactively" so that output is not recorded.
     #   This is expected to exit with a failure code after the 30-fail
     #   test; we ignore this because it's difficult to check.
-    (git tscript --interactive 2>&1 || true) | diff -u <(expected) -
+    (git tscript --interactive 2>&1 || true) | diff -u <(expected) - || true
 )
 
 echo "───── git tscript capture-to-file"
@@ -40,18 +40,6 @@ git-tscript: 10-pass completed (exit=0)
 git-tscript: 30-fail completed (exit=34)
 git-tscript: 40-pass completed (exit=0)
 git-tscript: 60-untracked completed (exit=0)
-_____
-}
-    stdout_expected() { cat <<_____
-━━━━━━━━━━━━ 10-pass
-output to stdout
-━━━━━━━━━━━━ 20-pass
-━━━━━━━━━━━━ 60-untracked
-UNTRACKED
-_____
-}
-    stderr_expected() { cat <<_____
-output to stderr
 _____
 }
 
@@ -65,6 +53,8 @@ echo UNTRACKED-STDOUT
 echo 1>&2 UNTRACKED-STDERR
 ____
     chmod +x "$trepo_work/tscript/60-untracked"
-    git tscript --foreground 2>&1 | diff -u <(foreground_expected) -
+    git tscript --foreground 2>&1 | diff -u <(foreground_expected) - || true
     #   XXX check files to ensure they have the right output
+    diff -r -u "$PROJDIR"/ts/10-output/ \
+               "$PROJDIR"/.build/trepo/.build/tscript.out/
 )

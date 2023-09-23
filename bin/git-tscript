@@ -15,12 +15,14 @@ from    pygit2  import *
 
 ARGS = None     # set by parseargs()
 
+PROJECT_ROOT = None
+
 def main():
     ARGS = parseargs()
     repo = find_repo()
-    project_root = Path(repo.path).parent
-    chdir(project_root)
-    for ts in tscripts(project_root):
+    global PROJECT_ROOT; PROJECT_ROOT = Path(repo.path).parent
+    chdir(PROJECT_ROOT)
+    for ts in tscripts(PROJECT_ROOT):
         #   XXX in both cases here we should be dealing with the optional
         #   single argument to the test(s) somehow?
         if ARGS.interactive:
@@ -47,36 +49,61 @@ def run_ts_interactive(ts, arg=None):
         zero) or exit this program with the same exit code the child
         returned.
     '''
-    ec = run_ts(ts, arg)
+    ec = run_ts(ts, arg, inherit_stdin=True)
     if ec != 0: exit(ec)
 
 def run_ts_capture(ts, arg=None, foreground=False):
     ''' XXX capture output
 
-        ``stdin`` is always ``/dev/null``.
+        • stdin is always ``/dev/null``.
+        • stdout and stderr are captured in
+          ``.build/tscript.out/TS.ARG.{out,err}``
     '''
     #   This should set up the output to be captured into the repo
     #   (or files if working copy is modified) and then run the
     #   test in the background, not waiting for completion.
-    #   XXX 2. implement capture to file: `.build/tscript.out/TS.ARG.out`
+    #   XXX 2. test failure when working copy not modified (fails because
+    #          we don't yet write to Git repo
     #   XXX 3. implement background running
     #   XXX 4. implement capture to repo commit
 
-    ec = run_ts(ts, arg, io=(DEVNULL, None, None))
+    outpath = output_path(ts, arg, 'out')
+    errpath = output_path(ts, arg, 'err')
+
+    ec = run_ts(ts, arg, io=(outpath, errpath))
     fprint(stdout, 'git-tscript: {}{} completed (exit={})'.format(
         ts.name, ' ' + arg if arg else '', ec))
 
-def run_ts(ts, arg=None, io=(None, None, None)):
-    ''' Log a test header to `io[1]` (`stdout` if it's `None`) and run
-        the program at path `ts`. `io` is a tuple of file descriptors for
-        ``(stdin, stdout, stderr)``; `None` values indicate to inherit the
-        file descriptor from this process.
+def output_path(ts, arg, suffix):
+    if arg is None: arg = ''
+    return Path(PROJECT_ROOT, '.build', 'tscript.out',
+        '.'.join([ts.name, arg, suffix]))
 
-        This logs a 'FAILED message if the child process returns any
-        exit code other than 0. It returns the exit code of the child
-        process.
+def run_ts(ts, arg=None, inherit_stdin=False, io=(None, None)):
+    ''' Run the test script at path `ts`, with optional argument `arg`
+        (default `None`). A test header will be logged to the standard
+        output (whether inherited or captured), and also a failure message
+        if the `ts` exit code is anything other than 0.
+
+        * `inherit_stdin` is either `True` to let the tscript read from
+          this process' `stdin`, or `False` to have `stdin` return EOF on
+          read.
+        * `io` is a tuple indicating the destination of stdout and stderr.
+          The value `None` indicates the tscript should inherit the
+          descriptors from this process, otherwise the value should be a
+          `Path` to which the output will be written. (This is called
+          "capture" mode.)
+
+        The exit code of the tscript is returned.
     '''
-    header_fd = io[1];
+    def openf(i):
+        if i is None: return None
+        i.parent.mkdir(parents=True, exist_ok=True)
+        fd = i.open('w', buffering=- 1, encoding='UTF-8')
+        return fd
+    iof = tuple(openf(i) for i in io )
+
+    header_fd = iof[0];
     if header_fd is None: header_fd = stdout
     if arg is None:
         command = [ts]
@@ -86,8 +113,11 @@ def run_ts(ts, arg=None, io=(None, None, None)):
         fprint(header_fd, '━━━━━━━━━━━━ {} {}'.format(ts.name, arg))
 
     debug('io:', io)
-    ec = run(command, stdin=io[0], stdout=io[1], stderr=io[2]).returncode
+    stdin = None if inherit_stdin else DEVNULL
+    ec = run(command, stdin=stdin, stdout=iof[0], stderr=iof[1]).returncode
     if ec != 0: fprint(header_fd, '━━━━━ FAILED (exitcode={})'.format(ec))
+    for i in iof:
+        if i is not None: i.close()
     return ec
 
 ####################################################################
