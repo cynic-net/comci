@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+echo      'output to stdout'
+echo 1>&2 'output to stderr'
+
 true        # Always passes

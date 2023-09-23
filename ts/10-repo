@@ -19,6 +19,8 @@ echo "───── git tscript interactive"
 (
     expected() { cat <<_____
 ━━━━━━━━━━━━ 10-pass
+output to stdout
+output to stderr
 ━━━━━━━━━━━━ 30-fail
 ━━━━━ FAILED (exitcode=34)
 _____
@@ -42,11 +44,17 @@ _____
 }
     stdout_expected() { cat <<_____
 ━━━━━━━━━━━━ 10-pass
+output to stdout
 ━━━━━━━━━━━━ 20-pass
 ━━━━━━━━━━━━ 60-untracked
 UNTRACKED
 _____
 }
+    stderr_expected() { cat <<_____
+output to stderr
+_____
+}
+
     cd "$trepo_work"/
     #   A modified working copy, which includes non-ignored untracked files
     #   as well as changes to tracked files, causes git-tscript to capture
