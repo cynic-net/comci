@@ -5,6 +5,8 @@ PROJDIR=$(cd $(dirname "$0")/.. && pwd -P)
 trepo_src="$PROJDIR"/trepo
 trepo_work="$PROJDIR"/.build/trepo
 
+unindent() { sed -e 's/^        //'; }
+
 # ----------------------------------------------------------------------
 echo "───── test-repo setup"
 mkdir -p $(dirname "$trepo_work")
@@ -19,14 +21,15 @@ cp -r "$trepo_src/" "$trepo_work/"
 # ----------------------------------------------------------------------
 echo "───── git tscript interactive"
 (
-    expected() { cat <<_____
-━━━━━━━━━━━━ 10-pass
-output to stdout
-output to stderr
-━━━━━━━━━━━━ 30-fail
-━━━━━ FAILED (exitcode=34)
-_____
-}
+    expected() { unindent <<_
+        ━━━━━━━━━━━━ 10-pass
+        output to stdout
+        output to stderr
+        ━━━━━━━━━━━━ 30-fail
+        ━━━━━ FAILED (exitcode=34)
+_
+    }
+
     #   Ensure git-tscript finds repo root from subdir.
     cd "$trepo_work"/empty
     #   Run sample tests "interactively" so that output is not recorded.
@@ -37,24 +40,24 @@ _____
 
 # ----------------------------------------------------------------------
 echo "───── git tscript capture-to-file"
-(   
-    foreground_expected() { cat <<_____
-git-tscript: 10-pass completed (exit=0)
-git-tscript: 30-fail completed (exit=34)
-git-tscript: 40-pass completed (exit=0)
-git-tscript: 60-untracked completed (exit=0)
-_____
-}
+(
+    foreground_expected() { unindent <<_
+        git-tscript: 10-pass completed (exit=0)
+        git-tscript: 30-fail completed (exit=34)
+        git-tscript: 40-pass completed (exit=0)
+        git-tscript: 60-untracked completed (exit=0)
+_
+    }
 
     cd "$trepo_work"/
     #   A modified working copy, which includes non-ignored untracked files
     #   as well as changes to tracked files, causes git-tscript to capture
     #   to file instead of capture to repo.
-    cat <<____ > "$trepo_work/tscript/60-untracked"
-#!/usr/bin/env bash
-echo UNTRACKED-STDOUT
-echo 1>&2 UNTRACKED-STDERR
-____
+    unindent <<_ > "$trepo_work/tscript/60-untracked"
+        #!/usr/bin/env bash
+        echo UNTRACKED-STDOUT
+        echo 1>&2 UNTRACKED-STDERR
+_
     chmod +x "$trepo_work/tscript/60-untracked"
     git tscript --foreground 2>&1 | diff -u <(foreground_expected) - || true
     #   XXX check files to ensure they have the right output
