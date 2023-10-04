@@ -39,7 +39,18 @@ _
 )
 
 # ----------------------------------------------------------------------
-echo "───── git tscript capture-to-file"
+echo "───── git tscript capture-to-file (clean working tree)"
+(
+    foreground_expected() { unindent <<_
+        XXX
+_
+    }
+
+    (git tscript --foreground 2>&1 || true) | diff -u <(foreground_expected) -
+)
+
+# ----------------------------------------------------------------------
+echo "───── git tscript capture-to-file (dirty working tree)"
 (
     foreground_expected() { unindent <<_
         git-tscript: 10-pass completed (exit=0)
