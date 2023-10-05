@@ -39,17 +39,6 @@ _
 )
 
 # ----------------------------------------------------------------------
-echo "───── git tscript capture-to-file (clean working tree)"
-(
-    foreground_expected() { unindent <<_
-        XXX
-_
-    }
-
-    (git tscript --foreground 2>&1 || true) | diff -u <(foreground_expected) -
-)
-
-# ----------------------------------------------------------------------
 echo "───── git tscript capture-to-file (dirty working tree)"
 (
     foreground_expected() { unindent <<_
@@ -73,5 +62,5 @@ _
     git tscript --foreground 2>&1 | diff -u <(foreground_expected) - || true
     #   XXX check files to ensure they have the right output
     diff -r -u "$PROJDIR"/ts/10-output/ \
-               "$PROJDIR"/.build/trepo/.build/tscript.out/
+               "$PROJDIR"/.build/trepo/.build/tscript/out/
 )

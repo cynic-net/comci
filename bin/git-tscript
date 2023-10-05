@@ -61,7 +61,7 @@ def run_ts_capture(ts, arg=None, foreground=False):
 
         • stdin is always ``/dev/null``.
         • stdout and stderr are captured in
-          ``.build/tscript.out/TS.ARG.{out,err}``
+          ``.build/tscript/out/TS.ARG.{out,err}``
     '''
     #   This should set up the output to be captured into the repo
     #   (or files if working copy is modified) and then run the
@@ -80,8 +80,8 @@ def run_ts_capture(ts, arg=None, foreground=False):
 
 def output_path(ts, arg, suffix):
     if arg is None: arg = ''
-    return Path(PROJECT_ROOT, '.build', 'tscript.out',
-        '.'.join([ts.name, arg, suffix]))
+    fname = '.'.join([ts.name, arg, suffix])
+    return PROJECT_ROOT / '.build' / 'tscript' / 'out' / fname
 
 def run_ts(ts, arg=None, inherit_stdin=False, io=(None, None)):
     ''' Run the test script at path `ts`, with optional argument `arg`
