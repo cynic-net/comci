@@ -59,8 +59,10 @@ _
         echo 1>&2 UNTRACKED-STDERR
 _
     chmod +x "$trepo_work/tscript/60-untracked"
+    buildts="$PROJDIR"/.build/trepo/.build/tscript
     git tscript --foreground 2>&1 | diff -u <(foreground_expected) - || true
-    #   XXX check files to ensure they have the right output
-    diff -r -u "$PROJDIR"/ts/10-output/ \
-               "$PROJDIR"/.build/trepo/.build/tscript/out/
+    #   check that working copy was copied
+    diff -q -r "$PROJDIR"/trepo/tscript/ "$buildts"/tscript/
+    #   check files to ensure they have the right output
+    diff -r -u "$PROJDIR"/ts/10-output/ "$buildts"/out
 )
