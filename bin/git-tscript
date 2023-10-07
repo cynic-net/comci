@@ -3,6 +3,7 @@
 from    argparse  import ArgumentParser
 from    os  import chdir, getcwd
 from    pathlib  import Path
+from    shutil  import rmtree
 from    stat  import S_IXUSR
 from    subprocess  import run, DEVNULL
 from    sys  import stdout, stderr
@@ -13,15 +14,23 @@ from    pygit2  import *
 ####################################################################
 #   Main
 
-ARGS            = None
-PROJECT_ROOT    = None
-REPO            = None
+ARGS                = None
+PROJECT_ROOT        = None
+REPO                = None
+TSCRIPT_WORK        = None
+TSCRIPT_WORKTREE    = None
 
 def main():
-    global ARGS, PROJECT_ROOT, REPO
+    global ARGS, PROJECT_ROOT, REPO, TSCRIPT_WORK, TSCRIPT_WORKTREE
     ARGS = parseargs()
     REPO = find_repo()
     PROJECT_ROOT = Path(REPO.path).parent
+    TSCRIPT_WORK = PROJECT_ROOT / '.build' / 'tscript'
+    TSCRIPT_WORKTREE = TSCRIPT_WORK / 'worktree'
+
+    rmtree(TSCRIPT_WORK, ignore_errors=True)
+    TSCRIPT_WORK.mkdir(parents=True, exist_ok=True)
+
     chdir(PROJECT_ROOT)
     for ts in tscripts(PROJECT_ROOT):
         #   XXX in both cases here we should be dealing with the optional
@@ -57,12 +66,15 @@ def run_ts_capture(ts, arg=None, foreground=False):
         and failure status of each one. These are run against a copy of
         the working tree.
 
-        XXX capture output
-
         • stdin is always ``/dev/null``.
         • stdout and stderr are captured in
           ``.build/tscript/out/TS.ARG.{out,err}``
     '''
+
+    create_tscript_worktree()
+
+    #   XXX capture output
+
     #   This should set up the output to be captured into the repo
     #   (or files if working copy is modified) and then run the
     #   test in the background, not waiting for completion.
@@ -78,10 +90,23 @@ def run_ts_capture(ts, arg=None, foreground=False):
     fprint(stdout, 'git-tscript: {}{} completed (exit={})'.format(
         ts.name, ' ' + arg if arg else '', ec))
 
+def create_tscript_worktree():
+    #   check out given commit (currently always HEAD) into our test worktree
+    REPO.checkout(refname=None,
+        directory=TSCRIPT_WORKTREE, strategy=GIT_CHECKOUT_FORCE) 
+
+    #   XXX also check out submodules (which may also be modified?)
+
+    #   If "commit" we're testing is working copy, we also must copy from
+    #   the working copy any files that are modified or untracked but not
+    #   ignored.
+    files = REPO.status(untracked_files='all', ignored=False)
+    print('XXX copy these too:\n', files); exit(99) # XXX
+
 def output_path(ts, arg, suffix):
     if arg is None: arg = ''
     fname = '.'.join([ts.name, arg, suffix])
-    return PROJECT_ROOT / '.build' / 'tscript' / 'out' / fname
+    return TSCRIPT_WORK / 'out' / fname
 
 def run_ts(ts, arg=None, inherit_stdin=False, io=(None, None)):
     ''' Run the test script at path `ts`, with optional argument `arg`
