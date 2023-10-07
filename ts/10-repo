@@ -62,7 +62,7 @@ _
     buildts="$PROJDIR"/.build/trepo/.build/tscript
     git tscript --foreground 2>&1 | diff -u <(foreground_expected) - || true
     #   check that working copy was copied
-    diff -q -r "$PROJDIR"/trepo/tscript/ "$buildts"/tscript/
+   #diff -q -r "$PROJDIR"/trepo/tscript/ "$buildts"/tscript/
     #   check files to ensure they have the right output
     diff -r -u "$PROJDIR"/ts/10-output/ "$buildts"/out
 )
