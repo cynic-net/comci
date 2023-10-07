@@ -11,6 +11,8 @@ PROJDIR=$(cd $(dirname "$0")/.. && pwd -P)
 
 unindent() { sed -e 's/^        //'; }
 
+fail() { local ec=$?; echo 1>&2 FAILURE: "$@"; exit $ec; }
+
 # ----------------------------------------------------------------------
 echo "───── test-repo setup"
 mkdir -p $(dirname "$trepo")
@@ -69,9 +71,9 @@ _
     testwork="$trepo/.build/tscript/worktree"
     git tscript --foreground 2>&1 | diff -u <(foreground_expected) - || true
     #   check that working copy was copied properly
-   #diff -q -r "$PROJDIR/trepo/tscript/" "$trepo/tscript/"
-   #test -f "$tt_worktree/untracked/untracked-file"
-   #test ! -f "$tt_worktree/untracked/ignored-file"
+   #diff -q -r "$trepo/tscript/" "$tt_worktree/tscript/" || fail "worktree"
+   #test -f "$tt_worktree/untracked/untracked-file" || fail "untracked-file"
+   #test ! -f "$tt_worktree/untracked/ignored-file" || fail "ignored-file"
     #   check files to ensure they have the right output
     diff -r -u "$PROJDIR"/ts/10-output/ "$tt_out"
 )
