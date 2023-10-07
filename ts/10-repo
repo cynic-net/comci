@@ -2,8 +2,12 @@
 set -euo pipefail
 
 PROJDIR=$(cd $(dirname "$0")/.. && pwd -P)
-twtree_src="$PROJDIR"/twtree    # working tree used to init test repo
-trepo="$PROJDIR"/.build/trepo   # Test repo/project on which we operate
+
+  src_twtree="$PROJDIR"/twtree          # working tree used to init test repo
+       trepo="$PROJDIR"/.build/trepo    # test repo/project on which we operate
+  tt_tscript="$trepo/tscript"
+ tt_worktree="$trepo/.build/tscript/worktree"   # test repo's test worktree
+      tt_out="$trepo/.build/tscript/out"        # test repo's test output
 
 unindent() { sed -e 's/^        //'; }
 
@@ -11,11 +15,13 @@ unindent() { sed -e 's/^        //'; }
 echo "───── test-repo setup"
 mkdir -p $(dirname "$trepo")
 rm -rf "$trepo/"
-cp -r "$twtree_src/" "$trepo/"
+cp -r "$src_twtree/" "$trepo/"
 (   cd "$trepo"
     git init -q
     git add .
     git commit -q -m 'Test repository initial commit'
+    mkdir untracked/
+    touch untracked/ignored-file untracked/untracked-file
 )
 
 # ----------------------------------------------------------------------
@@ -59,10 +65,13 @@ _
         echo 1>&2 UNTRACKED-STDERR
 _
     chmod +x "$trepo/tscript/60-untracked"
-    buildts="$PROJDIR"/.build/trepo/.build/tscript
+
+    testwork="$trepo/.build/tscript/worktree"
     git tscript --foreground 2>&1 | diff -u <(foreground_expected) - || true
-    #   check that working copy was copied
-   #diff -q -r "$PROJDIR"/trepo/tscript/ "$buildts"/tscript/
+    #   check that working copy was copied properly
+   #diff -q -r "$PROJDIR/trepo/tscript/" "$trepo/tscript/"
+   #test -f "$tt_worktree/untracked/untracked-file"
+   #test ! -f "$tt_worktree/untracked/ignored-file"
     #   check files to ensure they have the right output
-    diff -r -u "$PROJDIR"/ts/10-output/ "$buildts"/out
+    diff -r -u "$PROJDIR"/ts/10-output/ "$tt_out"
 )
