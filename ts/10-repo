@@ -2,17 +2,17 @@
 set -euo pipefail
 
 PROJDIR=$(cd $(dirname "$0")/.. && pwd -P)
-trepo_src="$PROJDIR"/trepo
-trepo_work="$PROJDIR"/.build/trepo
+twtree_src="$PROJDIR"/twtree    # working tree used to init test repo
+trepo="$PROJDIR"/.build/trepo   # Test repo/project on which we operate
 
 unindent() { sed -e 's/^        //'; }
 
 # ----------------------------------------------------------------------
 echo "───── test-repo setup"
-mkdir -p $(dirname "$trepo_work")
-rm -rf "$trepo_work/"
-cp -r "$trepo_src/" "$trepo_work/"
-(   cd "$trepo_work"
+mkdir -p $(dirname "$trepo")
+rm -rf "$trepo/"
+cp -r "$twtree_src/" "$trepo/"
+(   cd "$trepo"
     git init -q
     git add .
     git commit -q -m 'Test repository initial commit'
@@ -31,7 +31,7 @@ _
     }
 
     #   Ensure git-tscript finds repo root from subdir.
-    cd "$trepo_work"/empty
+    cd "$trepo"/empty
     #   Run sample tests "interactively" so that output is not recorded.
     #   This is expected to exit with a failure code after the 30-fail
     #   test; we ignore this because it's difficult to check.
@@ -49,16 +49,16 @@ echo "───── git tscript capture-to-file (dirty working tree)"
 _
     }
 
-    cd "$trepo_work"/
+    cd "$trepo"/
     #   A modified working copy, which includes non-ignored untracked files
     #   as well as changes to tracked files, causes git-tscript to capture
     #   to file instead of capture to repo.
-    unindent <<_ > "$trepo_work/tscript/60-untracked"
+    unindent <<_ > "$trepo/tscript/60-untracked"
         #!/usr/bin/env bash
         echo UNTRACKED-STDOUT
         echo 1>&2 UNTRACKED-STDERR
 _
-    chmod +x "$trepo_work/tscript/60-untracked"
+    chmod +x "$trepo/tscript/60-untracked"
     buildts="$PROJDIR"/.build/trepo/.build/tscript
     git tscript --foreground 2>&1 | diff -u <(foreground_expected) - || true
     #   check that working copy was copied
