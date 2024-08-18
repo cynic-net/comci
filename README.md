@@ -25,13 +25,19 @@ session might be:
 
     #   Run three test scripts from the full set: 'unit' and 'brief' with
     #   no parameters passed to them, and 'int' with the parameter 'foo'
-    #   and 'bar'. These will be run in the background and the user will be
-    #   informed as each one completes.
+    #   and 'bar'. These will be run in the background on new working
+    #   copies from that commit (a separate working copy for each test) and
+    #   the user will be informed as each one completes.
 
     $ git tscript run unit brief int,foo int,bar
 
-    #   Here the user can do other things while waiting
-    #   for the tests to complete.
+    #   Here the user can do other things while waiting for the tests to
+    #   complete. For example, run tests against the the _current_ working
+    #   copy (`-i`/`--interactive` option) instead of a commit. This will
+    #   be run in the foreground and the results will not be recorded to git.
+
+    $ vi foo.py
+    $ git tscript run -i unit
 
     $ git commit -m 'FIXUP: Clean up blah blah blah'
 
