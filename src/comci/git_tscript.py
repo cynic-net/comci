@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 from    argparse  import ArgumentParser
 from    os  import chdir, getcwd
 from    pathlib  import Path
@@ -156,7 +154,3 @@ def die(exitcode, *s):
     print(*s, file=stderr, flush=True)
     print( 'XXX exitcode:', exitcode, file=stderr, flush=True)
     exit(exitcode)
-
-####################################################################
-
-if __name__ == '__main__': main()

@@ -1,0 +1,29 @@
+[project]
+version = '0.0.0.dev1'
+name = 'comci'
+description = 'Committed CI Results'
+authors = [
+    { name = 'Curt J. Sampson', email = 'cjs@cynic.net' },
+    { name = 'Nishant Rodrigues', email = 'nishantjr@gmail.com' },
+]
+readme = 'README.md'
+urls.homepage = 'https://github.com/cynic-net/comci'
+urls.source = 'https://github.com/cynic-net/comci'
+urls.tracker = 'https://github.com/cynic-net/comci/issues'
+
+requires-python = '>=3.8'
+dependencies = ['pygit2']
+
+####################################################################
+
+[project.scripts]
+git-tscript         = 'comci.git_tscript:main'
+
+[build-system]
+requires = ['setuptools']
+build-backend = 'setuptools.build_meta'
+
+####################################################################
+
+[tool.pytest.ini_options]
+testpaths = ['src']

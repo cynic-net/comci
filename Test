@@ -15,8 +15,7 @@ PROJDIR=$(cd $(dirname "$0") && pwd -P)
 cd "$PROJDIR"
 [[ ${#@} -gt 0 && $1 == -C ]] && { shift; rm -rf .build; }
 
-. ./pactivate
-PATH="$PROJDIR/bin:$PATH"
+. ./pactivate -q
 cd "$PROJDIR"
 
 #   Since we're testing tscript, we don't want to use it. So we manually
