@@ -1,3 +1,19 @@
+'''
+
+tscript run [-f] COMMIT TEST-SPEC ...                   # cap-commit, background
+tscript run [-f] .      TEST-SPEC ...                   # cap-files,  background
+tscript run   -i COMMIT TEST-SPEC ... -- test-args      # cap-none,   foreground
+tscript run   -i .      TEST-SPEC ... -- test-args      # cap-none,   foreground
+tscript show ...
+tscript list ... # ?
+
+Consider later making `COMMIT` optional, defaulting to HEAD.
+
+Though we say COMMIT above, results are stored indexed by the tree to which
+that commit points. Two different commits with the same tree will have the
+same results.
+
+'''
 from    argparse  import ArgumentParser
 from    os  import chdir, getcwd
 from    pathlib  import Path
@@ -34,8 +50,19 @@ def parseargs():
         Summary of what this program does.
         And details on further lines.''',
         epilog='Text after options are listed')
-    p.add_argument('-i', '--interactive', action='store_true')
-    p.add_argument('-f', '--foreground', action='store_true')
+    a = p.add_argument
+    a('-R', '--rerun', action='store_true',
+        help='Run tests on a commit even when we already have test results stored')
+        # overwrites previous results
+    a('-f', '--foreground', action='store_true',
+        help='Wait for all tests to complete before returning.')
+    a('-i', '--interactive', action='store_true',
+        help='Run tests in foreground sending output to the terminal.')
+        # sets -f and -R
+    a('TARGET',
+        help='or `.` for working copy')
+    a('TESTSPEC', nargs='*'
+        help='0 or more `tname`, `tname,param,param`')
     return p.parse_args()
 
 ####################################################################

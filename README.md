@@ -29,7 +29,7 @@ session might be:
     #   copies from that commit (a separate working copy for each test) and
     #   the user will be informed as each one completes.
 
-    $ git tscript run unit brief int,foo int,bar
+    $ git tscript run @ unit brief int,foo int,bar
 
     #   Here the user can do other things while waiting for the tests to
     #   complete. For example, run tests against the the _current_ working
@@ -37,16 +37,15 @@ session might be:
     #   be run in the foreground and the results will not be recorded to git.
 
     $ vi foo.py
-    $ git tscript run -i unit
+    $ git tscript run -i . unit
 
     $ git commit -m 'FIXUP: Clean up blah blah blah'
 
     #   After completion the results can be examined:
 
     $ git log -2            # A Git note will summarise the results
-    $ git tscript show @^   # Shows details of the tests we ran at the start
-                            # start against what is now the parent of our
-                            # fixup commit.
+    $ git tscript show @^   # Shows details of the tests we ran at the
+                            # start against the parent of our fixup commit.
 
     #   If all is happy, you can generate a new commit with your cleanup
     #   and the full set of tests for it. This will run all test scripts
@@ -54,9 +53,12 @@ session might be:
     #   from a list of all the parameters in tscript/int.params.
 
     $ git rebase -i         # Squash fixups into final commit.
-    $ git tscript run       # Run all tests against this new commit. If the
+    $ git tscript run @     # Run all tests against this new commit. If the
                             # commit has already had some tests run against
                             # it, this will run only the not-yet-run tests.
+                            # Since test results are linked to the commit's
+                            # tree, squashing commits will not force
+                            # re-running tests.
 
     #   You can work on something else while these run in the background.
 
