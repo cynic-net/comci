@@ -18,6 +18,9 @@ cd "$PROJDIR"
 . ./pactivate -q
 cd "$PROJDIR"
 
+mypy
+pytest "$@"
+
 #   Since we're testing tscript, we don't want to use it. So we manually
 #   run through all the tests under comci-tests/ instead. Nor are tscript
 #   used here; instead we just pass in whatever came from the command line.

@@ -12,7 +12,7 @@ urls.source = 'https://github.com/cynic-net/comci'
 urls.tracker = 'https://github.com/cynic-net/comci/issues'
 
 requires-python = '>=3.8'
-dependencies = ['pygit2']
+dependencies = [ 'pygit2 ~= 1.15.1', ]
 
 ####################################################################
 
@@ -25,5 +25,16 @@ build-backend = 'setuptools.build_meta'
 
 ####################################################################
 
+[tool.mypy]
+files       = [ 'src', 'src/**/*.pt' ]
+#   mypy normally loads non-*.py files as a module named __main__, causing
+#   a collsion if there's more than one of them. The following option changes
+#   mypy to name the module after the filename (including extension), which
+#   allows checking multiple *.pt files in one run.
+scripts_are_modules = true
+#   Type-check the interior of functions without type annotations.
+check_untyped_defs  = true
+
 [tool.pytest.ini_options]
-testpaths = ['src']
+testpaths = ['src']     # used only when pytest started from rootdir
+addopts   = ['-q', '-p pytest_pt', '--doctest-modules']

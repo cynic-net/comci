@@ -1,0 +1,8 @@
+from comci.git_tscript import parseargs
+
+import pytest
+
+def test_parseargs_none():
+    with pytest.raises(SystemExit) as ex:
+        parseargs([])
+    assert 2 == ex.value.code

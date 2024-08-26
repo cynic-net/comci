@@ -14,26 +14,33 @@ that commit points. Two different commits with the same tree will have the
 same results.
 
 '''
-from    argparse  import ArgumentParser
+from    argparse  import ArgumentParser, Namespace
 from    os  import chdir, getcwd
 from    pathlib  import Path
 from    stat  import S_IXUSR
 from    subprocess  import run, DEVNULL
-from    sys  import stdout, stderr
+from    sys  import argv, stdout, stderr
 
-from    pygit2  import *
+#   XXX A `py.typed` was added to pygit2 in the commit just after the
+#   1.15.1 release. The type:ignore below should be removed as soon
+#   as the next release is out and we can upgrade.
+#   (Also, don't understand how mypy thinks Repository and
+#   discover_repository() don't come in with the `*` import, but this
+#   will go away anyway once we get a py.typed version.)
+from    pygit2  import *        # type: ignore[import-untyped]
+from    pygit2  import (Repository, discover_repository)
 
 
 ####################################################################
 #   Main
 
-ARGS            = None
-PROJECT_ROOT    = None
-REPO            = None
+ARGS            :Namespace
+PROJECT_ROOT    :Path
+REPO            :Repository
 
 def main():
     global ARGS, PROJECT_ROOT, REPO
-    ARGS = parseargs()
+    ARGS = parseargs(argv[1:])
     REPO = find_repo()
     PROJECT_ROOT = Path(REPO.path).parent
     chdir(PROJECT_ROOT)
@@ -45,25 +52,33 @@ def main():
         else:
             run_ts_capture(ts, arg=None, foreground=ARGS.foreground)
 
-def parseargs():
-    p = ArgumentParser(description='''
+def parseargs(command_line_args):
+    top_parser = ArgumentParser(description='''
         Summary of what this program does.
         And details on further lines.''',
         epilog='Text after options are listed')
-    a = p.add_argument
-    a('-R', '--rerun', action='store_true',
+    sub = top_parser.add_subparsers(required=True)
+
+    run_parser = sub.add_parser('run', help='XXX run')
+    ra = run_parser.add_argument
+    ra('-R', '--rerun', action='store_true',
         help='Run tests on a commit even when we already have test results stored')
         # overwrites previous results
-    a('-f', '--foreground', action='store_true',
+    ra('-f', '--foreground', action='store_true',
         help='Wait for all tests to complete before returning.')
-    a('-i', '--interactive', action='store_true',
+    ra('-i', '--interactive', action='store_true',
         help='Run tests in foreground sending output to the terminal.')
         # sets -f and -R
-    a('TARGET',
+    ra('TARGET',
         help='or `.` for working copy')
-    a('TESTSPEC', nargs='*'
+    ra('TESTSPEC', nargs='*',
         help='0 or more `tname`, `tname,param,param`')
-    return p.parse_args()
+
+    show_parser = sub.add_parser('show', help='XXX show')
+
+    list_parser = sub.add_parser('list', help='XXX list')
+
+    return top_parser.parse_args(command_line_args)
 
 ####################################################################
 #   Run single tests.
@@ -152,7 +167,7 @@ def run_ts(ts, arg=None, inherit_stdin=False, io=(None, None)):
 ####################################################################
 #   File system functions
 
-def find_repo():
+def find_repo() -> Repository:
     cwd = getcwd()
     debug('cwd:', cwd)
     repo_path = discover_repository(cwd)
