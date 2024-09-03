@@ -16,6 +16,7 @@ same results.
 '''
 from    argparse  import ArgumentParser, Namespace
 from    functools  import partial as par
+from    importlib.metadata  import version
 from    os  import chdir, getcwd
 from    pathlib  import Path
 from    stat  import S_IXUSR
@@ -44,8 +45,14 @@ PROJECT_ROOT    :Path
 REPO            :Repository
 
 def main(command_line_args=None):
+    args, parser = parseargs(command_line_args)
+    if args.version:
+        print(f'{parser.prog} version {version(parser.prog)}')
+        return
+    elif not hasattr(args, 'cmd'):
+        parser.error('command must be specified')
+
     global PROJECT_ROOT, REPO
-    args = parseargs(command_line_args)
     REPO = find_repo()
     PROJECT_ROOT = Path(REPO.path).parent
     chdir(PROJECT_ROOT)
@@ -66,7 +73,11 @@ def parseargs(command_line_args):
         Summary of what this program does.
         And details on further lines.''',
         epilog='Text after options are listed')
-    sub = top_parser.add_subparsers(required=True)
+
+    top_parser.add_argument('--version', action='store_true',
+        help='show program version information')
+
+    sub = top_parser.add_subparsers()
 
     run_parser = sub.add_parser('run', help='XXX run')
     run_parser.set_defaults(cmd=command_run)
@@ -90,7 +101,7 @@ def parseargs(command_line_args):
     list_parser = sub.add_parser('list', help='XXX list')
     list_parser.set_defaults(cmd=par(unimpl_command, 'show'))
 
-    return top_parser.parse_args(command_line_args)
+    return top_parser.parse_args(command_line_args), top_parser
 
 def unimpl_command(name, args):
     die(9, f'unimplemented command: {name}')
@@ -209,5 +220,4 @@ def fprint(fd, *args):
 
 def die(exitcode, *s):
     print(*s, file=sys.stderr, flush=True)
-    print( 'XXX exitcode:', exitcode, file=sys.stderr, flush=True)
     exit(exitcode)

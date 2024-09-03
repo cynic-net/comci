@@ -1,19 +1,27 @@
 from    comci.git_tscript  import main, parseargs
 import  pytest
 
-def test_parseargs_none():
-    with pytest.raises(SystemExit) as ex:
-        parseargs([])
-    assert 2 == ex.value.code
+def test_version(capsys):
+    main(['--version'])
+    assert ' version ' in capsys.readouterr().out
 
-def test_main_show(capsys):
+def test_main_no_subcommand(capsys):
+    with pytest.raises(SystemExit) as ex:  main([])
+    assert 2 == ex.value.code \
+       and 'command must be specified' in capsys.readouterr().err
+
+def test_bad_subcommand(capsys):
+    with pytest.raises(SystemExit) as ex:  main(['XXX'])
+    assert 2 == ex.value.code \
+       and 'invalid choice' in capsys.readouterr().err
+
+def test_show(capsys):
     with pytest.raises(SystemExit) as ex:  main(['show'])
     assert 9 == ex.value.code \
        and 'unimplemented' in capsys.readouterr().err
 
-def test_main_run():
+def test_run(capsys):
     with pytest.raises(SystemExit) as ex:
         main(['run', 'foo', 'bar'])
-    print(dir(ex.value))
-    assert (2, 'bad args') == (ex.value.code, ex.value)
-
+    assert 2 == ex.value.code \
+       and 'bad args' in capsys.readouterr().err
