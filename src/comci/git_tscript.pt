@@ -1,7 +1,10 @@
 from    comci.git_tscript  import main, parseargs
 import  pytest
 
-def test_version(capsys):
+####################################################################
+#   Upper-level argument parsing.
+
+def test_main_version(capsys):
     main(['--version'])
     assert ' version ' in capsys.readouterr().out
 
@@ -10,18 +13,23 @@ def test_main_no_subcommand(capsys):
     assert 2 == ex.value.code \
        and 'command must be specified' in capsys.readouterr().err
 
-def test_bad_subcommand(capsys):
+def test_main_bad_subcommand(capsys):
     with pytest.raises(SystemExit) as ex:  main(['XXX'])
     assert 2 == ex.value.code \
        and 'invalid choice' in capsys.readouterr().err
 
-def test_show(capsys):
+def test_main_calls_cmd(capsys):
+    #   The 'show' subcommand works fine for the moment, but what we really
+    #   are testing here is not that but just that the `args.cmd(args)`
+    #   call occurs.
     with pytest.raises(SystemExit) as ex:  main(['show'])
     assert 9 == ex.value.code \
        and 'unimplemented' in capsys.readouterr().err
 
+####################################################################
+#   Run command
+
 def test_run(capsys):
-    with pytest.raises(SystemExit) as ex:
-        main(['run', 'foo', 'bar'])
+    with pytest.raises(SystemExit) as ex:  main(['run', 'foo', 'bar'])
     assert 2 == ex.value.code \
        and 'bad args' in capsys.readouterr().err
