@@ -91,9 +91,9 @@ def parseargs(command_line_args):
         help='Run tests in foreground sending output to the terminal.')
         # sets -f and -R
     ra('TARGET',
-        help='or `.` for working copy')
+        help='tree-ish or `.` for working copy')
     ra('TESTSPEC', nargs='*',
-        help='0 or more `tname`, `tname,param,param`')
+        help='optional `tname`/`tname,param,…` arguments')
 
     show_parser = sub.add_parser('show', help='XXX show')
     show_parser.set_defaults(cmd=par(unimpl_command, 'show'))
