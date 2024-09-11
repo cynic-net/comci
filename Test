@@ -13,7 +13,8 @@ trap '
 PROJDIR=$(cd $(dirname "$0") && pwd -P)
 
 cd "$PROJDIR"
-[[ ${#@} -gt 0 && $1 == -C ]] && { shift; rm -rf .build; }
+[[ ${#@} -gt 0 && $1 == -C ]] && { shift; rm -rf .build/; }
+[[ ${#@} -gt 0 && $1 == -c ]] && { shift; rm -rf .build/virtualenv/; }
 
 . ./pactivate -q
 cd "$PROJDIR"
