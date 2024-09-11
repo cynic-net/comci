@@ -1,0 +1,5 @@
+from    comci.run  import tscripts
+import  pytest
+
+def test_tscripts():
+    assert 0, 'write me'
