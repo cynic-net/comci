@@ -36,8 +36,6 @@ from    comci.util  import die, find_repo
 ####################################################################
 #   Main
 
-REPO            :Repository
-
 def main(command_line_args=None):
     args, parser = parseargs(command_line_args)
     if args.version:
@@ -46,9 +44,8 @@ def main(command_line_args=None):
     elif not hasattr(args, 'cmd'):
         parser.error('command must be specified')
 
-    global PROJECT_ROOT, REPO
-    REPO = find_repo()
-    PROJECT_ROOT = Path(REPO.path).parent
+    global PROJECT_ROOT
+    PROJECT_ROOT = Path(find_repo().path).parent
     chdir(PROJECT_ROOT)
     args.cmd(args)
 
