@@ -1,5 +1,6 @@
 ' ``run`` command '
 
+from    pathlib  import Path
 from    stat  import S_IXUSR
 from    subprocess  import run, DEVNULL
 
@@ -64,7 +65,7 @@ def run_ts_capture(ts, arg=None, foreground=False):
     fprint(sys.stdout, 'git-tscript: {}{} completed (exit={})'.format(
         ts.name, ' ' + arg if arg else '', ec))
 
-def output_path(ts, arg, suffix):
+def output_path(ts:Path, arg, suffix) -> Path:
     if arg is None: arg = ''
     fname = '.'.join([ts.name, arg, suffix])
     return PROJECT_ROOT / '.build' / 'tscript' / 'out' / fname
