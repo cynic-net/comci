@@ -1,18 +1,4 @@
 '''
-
-tscript run [-f] COMMIT TEST-SPEC ...                   # cap-commit, background
-tscript run [-f] .      TEST-SPEC ...                   # cap-files,  background
-tscript run   -i COMMIT TEST-SPEC ... -- test-args      # cap-none,   foreground
-tscript run   -i .      TEST-SPEC ... -- test-args      # cap-none,   foreground
-tscript show ...
-tscript list ... # ?
-
-Consider later making `COMMIT` optional, defaulting to HEAD.
-
-Though we say COMMIT above, results are stored indexed by the tree to which
-that commit points. Two different commits with the same tree will have the
-same results.
-
 '''
 from    argparse  import ArgumentParser
 from    functools  import partial as par
