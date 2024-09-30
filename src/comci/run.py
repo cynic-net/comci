@@ -13,34 +13,35 @@ import  sys
 from    comci.util  import debug, die, fprint
 import  comci.util as util
 
+ParamType = str | None
+
 ####################################################################
 
 def command_run(args):
     ''' Run the testspecs (test names and parameters) given on the command
         line or, if none given, all the tests with their default parameters.
     '''
-    die(9, 'XXX Write me!')
     for ts in tscripts(util.PROJECT_ROOT):
         #   XXX in both cases here we should be dealing with the optional
         #   single argument to the test(s) somehow?
         if args.interactive:
-            run_ts_interactive(ts, arg=None)
+            run_ts_interactive(ts, param=None)
         else:
-            run_ts_capture(ts, arg=None, foreground=args.foreground)
+            run_ts_capture(ts, param=None, foreground=args.foreground)
 
 ####################################################################
 #   Run single tests.
 
-def run_ts_interactive(ts, arg=None):
-    ''' Run test scripts in "interactive" mode, witing for tests to complete
+def run_ts_interactive(ts:Path, param:ParamType=None):
+    ''' Run test scripts in "interactive" mode, waiting for tests to complete
         and stopping at the first failure. These are run against the actual
         working tree with the stdin/stdout/stderr of this process. The exit
         code is 0 for success or the exit code of the test script that failed.
     '''
-    ec = run_ts(ts, arg, inherit_stdin=True)
+    ec = run_ts(ts, param, inherit_stdin=True)
     if ec != 0: exit(ec)
 
-def run_ts_capture(ts, arg=None, foreground=False):
+def run_ts_capture(ts:Path, param:ParamType=None, foreground=False):
     ''' Run all test scripts in "background" mode, capturing output and
         and failure status of each one. These are run against a copy of
         the working tree.
@@ -59,14 +60,14 @@ def run_ts_capture(ts, arg=None, foreground=False):
     #   XXX 3. implement background running
     #   XXX 4. implement capture to repo commit
 
-    outpath = output_path(ts, arg, 'out')
-    errpath = output_path(ts, arg, 'err')
+    outpath = output_path(ts, param, 'out')
+    errpath = output_path(ts, param, 'err')
 
-    ec = run_ts(ts, arg, io=(outpath, errpath))
+    ec = run_ts(ts, param, io=(outpath, errpath))
     fprint(sys.stdout, 'git-tscript: {}{} completed (exit={})'.format(
-        ts.name, ' ' + arg if arg else '', ec))
+        ts.name, ' ' + param if param else '', ec))
 
-def output_path(ts:Path, param:str|None, suffix:str) -> Path:
+def output_path(ts:Path, param:ParamType, suffix:str) -> Path:
     '''
         • `ts`: `Path` to the test script under ``tscript/``
         • `param`: test parameter (optional)
