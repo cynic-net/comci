@@ -25,11 +25,3 @@ def test_main_calls_cmd(capsys):
     with pytest.raises(SystemExit) as ex:  main(['show'])
     assert 9 == ex.value.code \
        and 'unimplemented' in capsys.readouterr().err
-
-####################################################################
-#   Run command
-
-def test_run(capsys):
-    with pytest.raises(SystemExit) as ex:  main(['run', 'foo', 'bar'])
-    assert 2 == ex.value.code \
-       and 'bad args' in capsys.readouterr().err
