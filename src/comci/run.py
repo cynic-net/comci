@@ -10,7 +10,8 @@ from    subprocess  import run, DEVNULL
 #   imported at collection time.
 import  sys
 
-from    comci.util  import PROJECT_ROOT, debug, die, fprint
+from    comci.util  import debug, die, fprint
+import  comci.util as util
 
 ####################################################################
 
@@ -19,7 +20,7 @@ def command_run(args):
         line or, if none given, all the tests with their default parameters.
     '''
     die(9, 'XXX Write me!')
-    for ts in tscripts(PROJECT_ROOT):
+    for ts in tscripts(util.PROJECT_ROOT):
         #   XXX in both cases here we should be dealing with the optional
         #   single argument to the test(s) somehow?
         if args.interactive:
@@ -65,10 +66,15 @@ def run_ts_capture(ts, arg=None, foreground=False):
     fprint(sys.stdout, 'git-tscript: {}{} completed (exit={})'.format(
         ts.name, ' ' + arg if arg else '', ec))
 
-def output_path(ts:Path, arg, suffix) -> Path:
-    if arg is None: arg = ''
-    fname = '.'.join([ts.name, arg, suffix])
-    return PROJECT_ROOT / '.build' / 'tscript' / 'out' / fname
+def output_path(ts:Path, param:str|None, suffix:str) -> Path:
+    '''
+        • `ts`: `Path` to the test script under ``tscript/``
+        • `param`: test parameter (optional)
+        • `suffix`: ``.out`` or ``.err``
+    '''
+    if param is None: param = ''
+    fname = '.'.join([ts.name, param, suffix])
+    return util.PROJECT_ROOT / '.build' / 'tscript' / 'out' / fname
 
 def run_ts(ts, arg=None, inherit_stdin=False, io=(None, None)):
     ''' Run the test script at path `ts`, with optional argument `arg`

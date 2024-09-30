@@ -1,13 +1,20 @@
 from    comci.run  import *
 import  comci.util as util
+from    os  import getcwd
 
 from    pathlib  import Path as P
 import  pytest
 
+def test_tscripts():
+    #   XXX relies on CWD being root of repo
+    root = P('comci-tests/10-repo-files')
+    assert [ P(root, 'tscript', t)
+             for t in ('10-pass', '30-fail', '40-pass', )
+    ] == list(tscripts(root))
+
 def test_output_path():
     util.PROJECT_ROOT = P('/proot')
-
-    assert 'XXX' == output_path(P('abc'))
-
-def test_tscripts():
-    assert 1, 'write me'
+    assert P('/proot/.build/tscript/out/abc..out') \
+        == output_path(P('abc'), None, 'out')
+    assert P('/proot/.build/tscript/out/abc.param.err') \
+        == output_path(P('abc'), 'param', 'err')
