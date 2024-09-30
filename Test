@@ -11,15 +11,15 @@ trap '
 }' 0
 
 PROJDIR=$(cd $(dirname "$0") && pwd -P)
-
 cd "$PROJDIR"
+
+skip_mypy=false
 [[ ${#@} -gt 0 && $1 == -C ]] && { shift; rm -rf .build/; }
 [[ ${#@} -gt 0 && $1 == -c ]] && { shift; rm -rf .build/virtualenv/; }
+[[ ${#@} -gt 0 && $1 == -T ]] && { shift; skip_mypy=true; }
 
 . ./pactivate -q
-cd "$PROJDIR"
-
-mypy
+$skip_mypy || mypy
 pytest "$@"
 
 #   Since we're testing tscript, we don't want to use it. So we manually
