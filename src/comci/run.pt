@@ -15,6 +15,6 @@ def test_tscripts():
 def test_output_path():
     util.PROJECT_ROOT = P('/proot')
     assert P('/proot/.build/tscript/out/abc..out') \
-        == output_path(P('abc'), None, 'out')
+        == output_path(P('abc'), '', 'out')
     assert P('/proot/.build/tscript/out/abc.param.err') \
         == output_path(P('abc'), 'param', 'err')
