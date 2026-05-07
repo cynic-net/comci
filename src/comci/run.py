@@ -27,9 +27,15 @@ def command_run(args):
     #     working copy for given commit.
     #   • Get test specs
     #     List of pairs of (tscript,param)
+    #   • forground/background
     #   • Get capture params (set up capture mode?)
     #     To stdout/err, file, commit.
 
+    setup_worktree(args.commit)
+    maybe_fork_collector(args.foreground)
+    wait_for_proc = []
+    for ts in tscripts(util.PROJECT_ROOT, args.test_spec):
+        wait_for_proc += run_ts(..)
 
     for ts in tscripts(util.PROJECT_ROOT):
         #   XXX in both cases here we should be dealing with the optional
